@@ -168,4 +168,8 @@ namespace eudaq {
     GetInstance().GetPlugin(ev).setCurrentTLUEvent(ev, tlu);
   }
 
+  void PluginManager::setSensorIDOffset(std::string PluginName, int ProdNumber, int SensIDOffset){
+     GetInstance().GetPlugin(make_pair(Event::str2id("_RAW"), PluginName)).SetSensorIDOffset(ProdNumber,SensIDOffset);
+  }
+
 } // namespace eudaq

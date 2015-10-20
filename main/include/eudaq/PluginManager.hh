@@ -54,6 +54,8 @@ namespace eudaq {
     DataConverterPlugin &GetPlugin(t_eventid eventtype);
     DataConverterPlugin &GetPlugin(const Event &event);
 
+    static void setSensorIDOffset(std::string PluginName, int ProdNumber, int SensIDOffset);
+
   private:
     /** The map that correlates the event type with its converter plugin.
      */

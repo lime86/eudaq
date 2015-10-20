@@ -60,4 +60,15 @@ namespace eudaq {
     }
   }
 #endif // USE_EUTELESCOPE
+    void DataConverterPlugin::SetSensorIDOffset(int ProdNumber, int Offset){
+        sensorIDOffsetForProducer[ProdNumber]=Offset;
+    };
+    int DataConverterPlugin::GetSensorIDOffset(int ProdNumber) const{
+        if(sensorIDOffsetForProducer.count(ProdNumber)>0){
+               return sensorIDOffsetForProducer[ProdNumber];
+       } else {
+               return -1;
+       }
+    };
+
 } // namespace eudaq

@@ -178,6 +178,9 @@ namespace eudaq {
      */
     virtual ~DataConverterPlugin() {}
 
+    void SetSensorIDOffset(int ProdNumber, int Offset);
+    int GetSensorIDOffset(int ProdNumber) const;
+
   protected:
     /** The string storing the event type this plugin can convert to lcio.
      *  This string has to be set in the constructor of the actual
@@ -203,6 +206,8 @@ namespace eudaq {
      */
     DataConverterPlugin(DataConverterPlugin &);
     DataConverterPlugin &operator=(const DataConverterPlugin &);
+
+    mutable std::map<int,int> sensorIDOffsetForProducer;
   };
 
 } // namespace eudaq

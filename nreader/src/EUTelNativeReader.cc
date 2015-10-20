@@ -76,6 +76,18 @@ EUTelNativeReader::EUTelNativeReader()
   registerProcessorParameter("GeoID", "The geometry identification number",
                              _geoID, static_cast<int>(0));
 
+  registerOptionalParameter("ProducerNamesForSensorIDOffsets",
+                            "Producers which should get set an SensorID offset",
+                            _producerNamesForSensorIDOffsets,std::vector<std::string> {"APIX-CT","USBPIXI4","USBPIXI4"});
+
+  registerOptionalParameter("ProducerInstancesForSensorIDOffsets",
+                            "Producers which should get set an SensorID offset",
+                            _producerInstancesForSensorIDOffsets,std::vector<int> {0,0,1});
+
+  registerOptionalParameter("SensorIDOffsetsPerProducer",
+                            "Producers which should get set an SensorID offset",
+                            _sensorIDOffsetsPerProducer,std::vector<int> {20,25,27});
+
   // from here below only detector specific parameters.
 
   // ---------- //
@@ -147,6 +159,15 @@ void EUTelNativeReader::readDataSource(int numEvents) {
   }
 
   if (reader->Event().IsBORE()) {
+    if(_producerNamesForSensorIDOffsets.size()==_sensorIDOffsetsPerProducer.size()){
+           for(std::vector<std::string>::iterator prodNameIt = _producerNamesForSensorIDOffsets.begin();prodNameIt!=_producerNamesForSensorIDOffsets.end();prodNameIt++){
+               streamlog_out(ERROR5) << "Registered offset " << _sensorIDOffsetsPerProducer.at(std::distance(_producerNamesForSensorIDOffsets.begin(), prodNameIt)) << " for producer " << *prodNameIt << " with number " << _producerInstancesForSensorIDOffsets.at(std::distance(_producerNamesForSensorIDOffsets.begin(), prodNameIt)) << std::endl;
+               eudaq::PluginManager::setSensorIDOffset(*prodNameIt,_producerInstancesForSensorIDOffsets.at(std::distance(_producerNamesForSensorIDOffsets.begin(), prodNameIt)),_sensorIDOffsetsPerProducer.at(std::distance(_producerNamesForSensorIDOffsets.begin(), prodNameIt)));
+           }
+    } else {
+       streamlog_out(ERROR5) << "eudaq::FileReader mismatch in number of arguments on parameters _sensorIDOffsetsPerProducer and _producerNamesForSensorIDOffsets" << std::endl;
+    }
+
     eudaq::PluginManager::Initialize(reader->Event());
     // this is the case in which the eudaq event is a Begin Of Run
     // Event. This is translating into a RunHeader in the case of

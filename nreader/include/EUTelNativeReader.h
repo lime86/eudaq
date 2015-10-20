@@ -198,6 +198,11 @@ namespace eutelescope {
      */
     bool _syncTriggerID;
 
+    StringVec _producerNamesForSensorIDOffsets;
+    IntVec _producerInstancesForSensorIDOffsets;
+    IntVec _sensorIDOffsetsPerProducer;
+
+
   private:
     // from here below only private data members
 
