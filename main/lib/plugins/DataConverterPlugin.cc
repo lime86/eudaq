@@ -75,6 +75,8 @@ namespace eudaq {
 	temp.desiredSensorID = desiredSensorID;
 	
 	#if USE_LCIO && USE_EUTELESCOPE
+	streamlog::logscope scope(streamlog::out);
+    scope.setName("EUDAQ:ConverterPlugin:BaseClass");
 	streamlog_out(MESSAGE9) << "SensorID requested by producer " << type << " instance " << instance << " : "  << description << std::endl;
 	#else
 	std::cout << "SensorID requested by producer " << type << " instance " << instance << " : "  << description << std::endl;
@@ -92,7 +94,7 @@ namespace eudaq {
 			#if USE_LCIO && USE_EUTELESCOPE
 			streamlog_out(MESSAGE9) << "Requested SensorID " << desiredSensorIDoffset << " is already taken. Will try  now to fulfill sensor offset requirement." << std::endl;
 			#else
-			std::cout << "Requested SensorID " << desiredSensorIDoffset << " is already taken. Will try  now to fulfill sensor offset requirement." << std::endl;
+			std::cout << "Requested SensorID " << desiredSensorIDoffset << " is already taken. Will try now to fulfill sensor offset requirement." << std::endl;
 			#endif
 		}
 	} 
@@ -103,9 +105,9 @@ namespace eudaq {
 		if(_sensorIDsTaken.count(sensorCounter)==0){
 			_sensorIDsTaken[sensorCounter] = temp;
 			#if USE_LCIO && USE_EUTELESCOPE
-			streamlog_out(MESSAGE9) << "SensorID " << desiredSensorIDoffset << " has been assigend." << std::endl;
+			streamlog_out(MESSAGE9) << "SensorID " << sensorCounter << " has been assigend." << std::endl;
 			#else
-			std::cout << "SensorID " << desiredSensorIDoffset << " has been assigend." << std::endl;
+			std::cout << "SensorID " << sensorCounter << " has been assigend." << std::endl;
 			#endif	
 			return sensorCounter;
 		}

@@ -258,7 +258,7 @@ namespace eudaq {
 
 	if(internalIDtoSensorID.count(m_sensorids[sensor] + sm + cio)>0){
 		zsDataEncoder["sensorID"] = internalIDtoSensorID.at(m_sensorids[sensor] + sm + cio);
-		streamlog_out(MESSAGE9) << "APXI-CT producer 0 has already SensorID " << internalIDtoSensorID.at(m_sensorids[sensor] + sm + cio) << " assigned to " << sensor << std::endl;
+		streamlog_out(DEBUG) << "APXI-CT producer 0 has already SensorID " << internalIDtoSensorID.at(m_sensorids[sensor] + sm + cio) << " assigned to " << sensor << std::endl;
 	} else {
 		internalIDtoSensorID[m_sensorids[sensor] + sm + cio] = getNewlyAssignedSensorID(m_sensorids[sensor] + sm + cio,20,"APIX-CT",0);
 		zsDataEncoder["sensorID"] = internalIDtoSensorID.at(m_sensorids[sensor] + sm + cio);
@@ -500,7 +500,7 @@ namespace eudaq {
   void APIXCTConverterPlugin::Initialize(const Event & source, const Configuration &) {
     #if USE_LCIO && USE_EUTELESCOPE
     streamlog::logscope scope(streamlog::out);
-    scope.setName("EUDAQ:ConverterPlugin:USBPixI4");
+    scope.setName("EUDAQ:ConverterPlugin:APIX-CT");
     #endif
 
     int nFrontends = from_string(source.GetTag("nFrontends"), 0);

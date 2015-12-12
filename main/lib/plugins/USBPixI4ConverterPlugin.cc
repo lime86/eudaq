@@ -156,9 +156,9 @@ class USBPixI4ConverterBase : public ATLASFEI4Interpreter<dh_lv1id_msk, dh_bcid_
 			#endif
 		} else {
 			#if USE_LCIO && USE_EUTELESCOPE
-			streamlog_out(MESSAGE9) << "Another USBPixI4 (#"<< count_producers <<") producer instance has been detected in BORE" << std::endl;
+			streamlog_out(MESSAGE9) << "USBPixI4 (#"<< count_producers <<") producer instance has been detected in BORE" << std::endl;
 			#else
-			std::cout << "[ConverterPlugin:USBPixI4] Another USBPixI4 (#"<< count_producers <<") producer instance has been detected in BORE" << std::endl;
+			std::cout << "[ConverterPlugin:USBPixI4] USBPixI4 (#"<< count_producers <<") producer instance has been detected in BORE" << std::endl;
 			#endif
 		}
 
@@ -228,21 +228,21 @@ class USBPixI4ConverterBase : public ATLASFEI4Interpreter<dh_lv1id_msk, dh_bcid_
 					moduleIndex[count_producers].push_back(j);
 				}
 			}
-			std::cout << "moduleConfig[" << count_producers << "]:" << std::endl;
-			for(auto& i : moduleConfig[count_producers]){
-				std::cout << i << ",";
-			};
-			std::cout << std::endl;
-			std::cout << "moduleIndex[" << count_producers << "]:" << std::endl;
-			for(auto& i : moduleIndex[count_producers]){
-				std::cout << i << ",";
-			};
-			std::cout << std::endl;
-			std::cout << "moduleCount[" << count_producers << "]:" << std::endl;
-			for(auto& i : moduleCount[count_producers]){
-				std::cout << i << ",";
-			};
-			std::cout << std::endl;
+//			std::cout << "moduleConfig[" << count_producers << "]:" << std::endl;
+//			for(auto& i : moduleConfig[count_producers]){
+//				std::cout << i << ",";
+//			};
+//			std::cout << std::endl;
+//			std::cout << "moduleIndex[" << count_producers << "]:" << std::endl;
+//			for(auto& i : moduleIndex[count_producers]){
+//				std::cout << i << ",";
+//			};
+//			std::cout << std::endl;
+//			std::cout << "moduleCount[" << count_producers << "]:" << std::endl;
+//			for(auto& i : moduleCount[count_producers]){
+//				std::cout << i << ",";
+//			};
+//			std::cout << std::endl;
 		}
 		else
 		{
@@ -625,10 +625,10 @@ class USBPixI4ConverterPlugin : public DataConverterPlugin , public USBPixI4Conv
 		if(this->advancedConfig.at(currently_handled_producer)) {
 			if(internalIDtoSensorID.count(currently_handled_producer*100+this->moduleConfig.at(currently_handled_producer).at(0)+chip_id_offset-1)>0){
 				previousSensorID = internalIDtoSensorID[currently_handled_producer*100+this->moduleConfig.at(currently_handled_producer).at(0)+chip_id_offset-1];
-				streamlog_out(MESSAGE9) << "USBPixI4 producer " << currently_handled_producer << " has already SensorID " << previousSensorID << " assigned to " << currently_handled_producer*100+this->moduleConfig.at(currently_handled_producer).at(0) << std::endl;
+				streamlog_out(DEBUG) << "USBPixI4 producer " << currently_handled_producer << " has already SensorID " << previousSensorID << " assigned to " << currently_handled_producer*100+this->moduleConfig.at(currently_handled_producer).at(0) << std::endl;
 			} else {
 				internalIDtoSensorID[currently_handled_producer*100+this->moduleConfig.at(currently_handled_producer).at(0)+chip_id_offset-1] = getNewlyAssignedSensorID(-1,20,"USBPIXI4",currently_handled_producer);
-				std::cout << "#id: " << this->moduleConfig.at(currently_handled_producer).at(0)+chip_id_offset-1 << std::endl;
+				//std::cout << "#id: " << this->moduleConfig.at(currently_handled_producer).at(0)+chip_id_offset-1 << std::endl;
 				previousSensorID = internalIDtoSensorID[currently_handled_producer*100+this->moduleConfig.at(currently_handled_producer).at(0)+chip_id_offset-1];
 				streamlog_out(MESSAGE9) << "USBPixI4 producer " << currently_handled_producer << " got SensorID " << previousSensorID << " assigned to " << currently_handled_producer*100+this->moduleConfig.at(currently_handled_producer).at(0) << std::endl;
 			}
@@ -636,7 +636,7 @@ class USBPixI4ConverterPlugin : public DataConverterPlugin , public USBPixI4Conv
 		else {
 			if(internalIDtoSensorID.count(currently_handled_producer*100+ev_raw.GetID(0) + chip_id_offset + this->first_sensor_id)>0){
 				previousSensorID = internalIDtoSensorID[currently_handled_producer*100+ev_raw.GetID(0) + chip_id_offset + this->first_sensor_id];
-				streamlog_out(MESSAGE9) << "USBPixI4 producer " << currently_handled_producer << " has already SensorID " << previousSensorID << " assigned to " << currently_handled_producer*100+ev_raw.GetID(0) << std::endl;
+				streamlog_out(DEBUG) << "USBPixI4 producer " << currently_handled_producer << " has already SensorID " << previousSensorID << " assigned to " << currently_handled_producer*100+ev_raw.GetID(0) << std::endl;
 			} else {
 				internalIDtoSensorID[currently_handled_producer*100+ev_raw.GetID(0) + chip_id_offset + this->first_sensor_id] = getNewlyAssignedSensorID(-1,20,"USBPIXI4",currently_handled_producer);
 				previousSensorID = internalIDtoSensorID[currently_handled_producer*100+ev_raw.GetID(0) + chip_id_offset + this->first_sensor_id];
@@ -664,12 +664,14 @@ class USBPixI4ConverterPlugin : public DataConverterPlugin , public USBPixI4Conv
 			{
 				if(internalIDtoSensorID.count(currently_handled_producer*100+this->moduleConfig.at(currently_handled_producer).at(0)+chip_id_offset-1)>0){
 					sensorID = internalIDtoSensorID[currently_handled_producer*100+this->moduleConfig.at(currently_handled_producer).at(0)+chip_id_offset-1];
+					streamlog_out(DEBUG) << "USBPixI4 producer " << currently_handled_producer << " has already SensorID " << previousSensorID << " assigned to " << currently_handled_producer*100+this->moduleConfig.at(currently_handled_producer).at(0) << std::endl;
 					//std::cout << "key: " << currently_handled_producer*100+this->moduleConfig.at(currently_handled_producer).at(0)+chip_id_offset-1 << std::endl;
 					//std::cout << "value: " << internalIDtoSensorID[currently_handled_producer*100+this->moduleConfig.at(currently_handled_producer).at(0)+chip_id_offset-1] << std::endl;
 					//std::cout << "sensorID " << sensorID << std::cout;
 				} else {
 					internalIDtoSensorID[currently_handled_producer*100+this->moduleConfig.at(currently_handled_producer).at(0)+chip_id_offset-1] = getNewlyAssignedSensorID(-1,20,"USBPIXI4",currently_handled_producer);
 					sensorID = internalIDtoSensorID[currently_handled_producer*100+this->moduleConfig.at(currently_handled_producer).at(0)+chip_id_offset-1];
+					streamlog_out(MESSAGE9) << "USBPixI4 producer " << currently_handled_producer << " got SensorID " << previousSensorID << " assigned to " << currently_handled_producer*100+this->moduleConfig.at(currently_handled_producer).at(0) << std::endl;
 					//std::cout << "sensorID " << sensorID << std::cout;
 				}
 			}
@@ -677,10 +679,12 @@ class USBPixI4ConverterPlugin : public DataConverterPlugin , public USBPixI4Conv
 			{
 				if(internalIDtoSensorID.count(currently_handled_producer*100+ev_raw.GetID(0) + chip_id_offset + this->first_sensor_id)>0){
 					sensorID = internalIDtoSensorID[currently_handled_producer*100+ev_raw.GetID(0) + chip_id_offset + this->first_sensor_id];
+					streamlog_out(DEBUG) << "USBPixI4 producer " << currently_handled_producer << " has already SensorID " << previousSensorID << " assigned to " << currently_handled_producer*100+ev_raw.GetID(0) << std::endl;
 					//std::cout << "sensorID " << sensorID << std::cout;
 				} else {
 					internalIDtoSensorID[currently_handled_producer*100+ev_raw.GetID(0) + chip_id_offset + this->first_sensor_id] = getNewlyAssignedSensorID(-1,20,"USBPIXI4",currently_handled_producer);
 					sensorID = internalIDtoSensorID[currently_handled_producer*100+ev_raw.GetID(0) + chip_id_offset + this->first_sensor_id];
+					streamlog_out(MESSAGE9) << "USBPixI4 producer " << currently_handled_producer << " got SensorID " << previousSensorID << " assigned to " << currently_handled_producer*100+ev_raw.GetID(0) << std::endl;
 					//std::cout << "sensorID " << sensorID << std::cout;
 				}
 			}
@@ -725,7 +729,7 @@ class USBPixI4ConverterPlugin : public DataConverterPlugin , public USBPixI4Conv
 					if(this->getHitData(currently_handled_producer,Word, false, Col, Row, ToT))
 					{
 						if(this->advancedConfig.at(currently_handled_producer)) this->transformChipsToModule(Col, Row, this->moduleIndex.at(currently_handled_producer).at(chip));
-						std::cout << "hit: " << Col << " " << Row << " written in Sensor " << sensorID << std::endl;
+						//std::cout << "hit: " << Col << " " << Row << " written in Sensor " << sensorID << std::endl;
 						eutelescope::EUTelGenericSparsePixel* thisHit = new eutelescope::EUTelGenericSparsePixel( Col, Row, ToT, lvl1-1);
 						sparseFrame->addSparsePixel( thisHit );
 						tmphits.push_back( thisHit );
