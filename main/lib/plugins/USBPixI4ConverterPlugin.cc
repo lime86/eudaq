@@ -630,7 +630,7 @@ class USBPixI4ConverterPlugin : public DataConverterPlugin , public USBPixI4Conv
 				internalIDtoSensorID[currently_handled_producer*100+this->moduleConfig.at(currently_handled_producer).at(0)+chip_id_offset-1] = getNewlyAssignedSensorID(-1,20,"USBPIXI4",currently_handled_producer);
 				//std::cout << "#id: " << this->moduleConfig.at(currently_handled_producer).at(0)+chip_id_offset-1 << std::endl;
 				previousSensorID = internalIDtoSensorID[currently_handled_producer*100+this->moduleConfig.at(currently_handled_producer).at(0)+chip_id_offset-1];
-				streamlog_out(MESSAGE9) << "USBPixI4 producer " << currently_handled_producer << " got SensorID " << previousSensorID << " assigned to " << currently_handled_producer*100+this->moduleConfig.at(currently_handled_producer).at(0) << std::endl;
+				streamlog_out(MESSAGE9) << "USBPixI4 producer " << currently_handled_producer << " got SensorID " << previousSensorID << " assigned to sensor/module at board" << currently_handled_producer*100+this->moduleConfig.at(currently_handled_producer).at(0) << std::endl;
 			}
 		}
 		else {
@@ -656,35 +656,36 @@ class USBPixI4ConverterPlugin : public DataConverterPlugin , public USBPixI4Conv
 
 		for(size_t chip = 0; chip < ev_raw.NumBlocks(); ++chip)
 		{
+			std::cout << "Chip: " << chip << " Modul: " << this->moduleConfig.at(currently_handled_producer).at(chip) << std::endl;
 			const std::vector <unsigned char>& buffer=dynamic_cast<const std::vector<unsigned char>&> (ev_raw.GetBlock(chip));
 			
 			int sensorID = -1;
 			
 			if(this->advancedConfig.at(currently_handled_producer))
 			{
-				if(internalIDtoSensorID.count(currently_handled_producer*100+this->moduleConfig.at(currently_handled_producer).at(0)+chip_id_offset-1)>0){
-					sensorID = internalIDtoSensorID[currently_handled_producer*100+this->moduleConfig.at(currently_handled_producer).at(0)+chip_id_offset-1];
-					streamlog_out(DEBUG) << "USBPixI4 producer " << currently_handled_producer << " has already SensorID " << previousSensorID << " assigned to " << currently_handled_producer*100+this->moduleConfig.at(currently_handled_producer).at(0) << std::endl;
+				if(internalIDtoSensorID.count(currently_handled_producer*100+this->moduleConfig.at(currently_handled_producer).at(chip)+chip_id_offset-1)>0){
+					sensorID = internalIDtoSensorID[currently_handled_producer*100+this->moduleConfig.at(currently_handled_producer).at(chip)+chip_id_offset-1];
+					streamlog_out(DEBUG) << "USBPixI4 producer " << currently_handled_producer << " has already SensorID " << sensorID << " assigned to " << currently_handled_producer*100+this->moduleConfig.at(currently_handled_producer).at(chip) << std::endl;
 					//std::cout << "key: " << currently_handled_producer*100+this->moduleConfig.at(currently_handled_producer).at(0)+chip_id_offset-1 << std::endl;
 					//std::cout << "value: " << internalIDtoSensorID[currently_handled_producer*100+this->moduleConfig.at(currently_handled_producer).at(0)+chip_id_offset-1] << std::endl;
 					//std::cout << "sensorID " << sensorID << std::cout;
 				} else {
-					internalIDtoSensorID[currently_handled_producer*100+this->moduleConfig.at(currently_handled_producer).at(0)+chip_id_offset-1] = getNewlyAssignedSensorID(-1,20,"USBPIXI4",currently_handled_producer);
-					sensorID = internalIDtoSensorID[currently_handled_producer*100+this->moduleConfig.at(currently_handled_producer).at(0)+chip_id_offset-1];
-					streamlog_out(MESSAGE9) << "USBPixI4 producer " << currently_handled_producer << " got SensorID " << previousSensorID << " assigned to " << currently_handled_producer*100+this->moduleConfig.at(currently_handled_producer).at(0) << std::endl;
+					internalIDtoSensorID[currently_handled_producer*100+this->moduleConfig.at(currently_handled_producer).at(chip)+chip_id_offset-1] = getNewlyAssignedSensorID(-1,20,"USBPIXI4",currently_handled_producer);
+					sensorID = internalIDtoSensorID[currently_handled_producer*100+this->moduleConfig.at(currently_handled_producer).at(chip)+chip_id_offset-1];
+					streamlog_out(MESSAGE9) << "USBPixI4 producer " << currently_handled_producer << " got SensorID " << sensorID << " assigned to " << currently_handled_producer*100+this->moduleConfig.at(currently_handled_producer).at(chip) << std::endl;
 					//std::cout << "sensorID " << sensorID << std::cout;
 				}
 			}
 			else
 			{
-				if(internalIDtoSensorID.count(currently_handled_producer*100+ev_raw.GetID(0) + chip_id_offset + this->first_sensor_id)>0){
-					sensorID = internalIDtoSensorID[currently_handled_producer*100+ev_raw.GetID(0) + chip_id_offset + this->first_sensor_id];
-					streamlog_out(DEBUG) << "USBPixI4 producer " << currently_handled_producer << " has already SensorID " << previousSensorID << " assigned to " << currently_handled_producer*100+ev_raw.GetID(0) << std::endl;
+				if(internalIDtoSensorID.count(currently_handled_producer*100+ev_raw.GetID(chip) + chip_id_offset + this->first_sensor_id)>0){
+					sensorID = internalIDtoSensorID[currently_handled_producer*100+ev_raw.GetID(chip) + chip_id_offset + this->first_sensor_id];
+					streamlog_out(DEBUG) << "USBPixI4 producer " << currently_handled_producer << " has already SensorID " << sensorID << " assigned to " << currently_handled_producer*100+ev_raw.GetID(chip) << std::endl;
 					//std::cout << "sensorID " << sensorID << std::cout;
 				} else {
-					internalIDtoSensorID[currently_handled_producer*100+ev_raw.GetID(0) + chip_id_offset + this->first_sensor_id] = getNewlyAssignedSensorID(-1,20,"USBPIXI4",currently_handled_producer);
-					sensorID = internalIDtoSensorID[currently_handled_producer*100+ev_raw.GetID(0) + chip_id_offset + this->first_sensor_id];
-					streamlog_out(MESSAGE9) << "USBPixI4 producer " << currently_handled_producer << " got SensorID " << previousSensorID << " assigned to " << currently_handled_producer*100+ev_raw.GetID(0) << std::endl;
+					internalIDtoSensorID[currently_handled_producer*100+ev_raw.GetID(chip) + chip_id_offset + this->first_sensor_id] = getNewlyAssignedSensorID(-1,20,"USBPIXI4",currently_handled_producer);
+					sensorID = internalIDtoSensorID[currently_handled_producer*100+ev_raw.GetID(chip) + chip_id_offset + this->first_sensor_id];
+					streamlog_out(MESSAGE9) << "USBPixI4 producer " << currently_handled_producer << " got SensorID " << sensorID << " assigned to " << currently_handled_producer*100+ev_raw.GetID(chip) << std::endl;
 					//std::cout << "sensorID " << sensorID << std::cout;
 				}
 			}
