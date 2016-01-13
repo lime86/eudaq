@@ -4,11 +4,13 @@
 #include "eudaq/RawDataEvent.hh"
 #include "eudaq/Timer.hh"
 #include "eudaq/ATLASFE4IInterpreter.hh"
+#include "eudaq/Configuration.hh"
 #include <cstdlib>
 #include <cstring>
 #include <exception>
 #include <map>
-
+#include <fstream>
+#include <algorithm>
 //All LCIO-specific parts are put in conditional compilation blocks
 //so that the other parts may still be used if LCIO is not available.
 #if USE_LCIO
@@ -57,6 +59,7 @@ class USBPixI4ConverterBase : public ATLASFEI4Interpreter<dh_lv1id_msk, dh_bcid_
 	std::map<unsigned int,unsigned int> count_boards; // number of boards per producer
 	std::map<unsigned int, std::vector<unsigned int>> board_ids; // board ids per producer
 
+	std::map<unsigned int, std::vector<int>> moduleBoardIDs;
 	std::map<unsigned int, std::vector<int>> moduleConfig; // one number per FE, the same within one module, consecutively numbered from module to module, e.g. 1,2,2,2,3,3,3,3,4,4,4,4
 	std::map<unsigned int, std::vector<int>> moduleCount; // number of FEs per module, e.g 1,3,4,4
 	std::map<unsigned int, std::vector<int>> moduleIndex; // numbering of FEs within a module, e.g. 1,1,2,3,1,2,3,4,1,2,3,4
@@ -86,7 +89,7 @@ class USBPixI4ConverterBase : public ATLASFEI4Interpreter<dh_lv1id_msk, dh_bcid_
 		return (unsigned int) board_ids.at(producer).at(board_index);
 	}
 
-	void getBOREparameters(const Event & ev)
+	void getBOREparameters(const Event & ev, const Configuration& cnf)
 	{
 		#if USE_LCIO && USE_EUTELESCOPE
 		streamlog::logscope scope(streamlog::out);
@@ -96,11 +99,11 @@ class USBPixI4ConverterBase : public ATLASFEI4Interpreter<dh_lv1id_msk, dh_bcid_
 		count_producers++; // sets it to 0 for the first one
 		advancedConfig[count_producers]=false; 
 
-
 		board_ids[count_producers].clear();
 		moduleConfig[count_producers].clear();
 		moduleCount[count_producers].clear();
 		moduleIndex[count_producers].clear();
+		moduleBoardIDs[count_producers].clear();
 
 		count_boards[count_producers] = ev.GetTag("boards", -1);
 		consecutive_lvl1[count_producers] = ev.GetTag("consecutive_lvl1", 16);
@@ -243,6 +246,59 @@ class USBPixI4ConverterBase : public ATLASFEI4Interpreter<dh_lv1id_msk, dh_bcid_
 //				std::cout << i << ",";
 //			};
 //			std::cout << std::endl;
+
+
+//			std::map<unsigned int, std::vector<int>> moduleBoardIDs;
+
+			//TODO: improvement of assumption that producerX equals producerX
+			std::ostringstream producerName;
+			producerName << "Producer.USBpix";
+			if(count_producers>0){
+				producerName << "-" << count_producers+1;
+			}
+			std::cout << "producerName: " << producerName.str() << std::endl;
+
+			if(cnf.SetSection(producerName.str()) == true) {
+				for(auto currBoard: board_ids[count_producers]){
+					//std::cout << "board iD " << currBoard<< std::endl;
+					//std::cout << "key " << (std::string)"modules["+std::to_string(currBoard)+(std::string)"]"<< std::endl;
+					//std::cout << "value " << cnf.Get((std::string)"modules["+std::to_string(currBoard)+(std::string)"]","invalid")<< std::endl;
+					if(cnf.Get((std::string)"modules["+std::to_string(currBoard)+(std::string)"]","invalid")!= "invalid") {
+					    std::istringstream buf(cnf.Get((std::string)"modules["+std::to_string(currBoard)+(std::string)"]","invalid"));
+					    for(std::string token; getline(buf, token, ','); )
+					        moduleBoardIDs[count_producers].push_back(currBoard);
+					    	std::cout << "board iD " << currBoard << std::endl;
+						//std::ostringstream boardIDstr;
+						//cnf.Get(boardIDstr.str(),"invalid");
+					}
+				};
+			} else {
+				producerName.clear();
+				producerName.str(std::string());
+
+				producerName << "Producer.USBpixI4";
+				if(count_producers>0){
+					producerName << "-" << count_producers;
+				}
+				std::cout << "producerName: " << producerName << std::endl;
+				if(cnf.SetSection(producerName.str()) == true) {
+					for(auto currBoard: board_ids[count_producers]){
+						//std::cout << "board iD " << currBoard<< std::endl;
+						//std::cout << "key " << (std::string)"modules["+std::to_string(currBoard)+(std::string)"]"<< std::endl;
+						//std::cout << "value " << cnf.Get((std::string)"modules["+std::to_string(currBoard)+(std::string)"]","invalid")<< std::endl;
+						if(cnf.Get((std::string)"modules["+std::to_string(currBoard)+(std::string)"]","invalid")!= "invalid") {
+						    std::istringstream buf(cnf.Get((std::string)"modules["+std::to_string(currBoard)+(std::string)"]","invalid"));
+						    for(std::string token; getline(buf, token, ','); )
+						        moduleBoardIDs[count_producers].push_back(currBoard);
+						    	//std::cout << "board iD " << currBoard << std::endl;
+							//std::ostringstream boardIDstr;
+							//cnf.Get(boardIDstr.str(),"invalid");
+						}
+					}
+				} else {
+					std::cout << "mismatch in identifying boards" << std::endl;
+				}
+			}
 		}
 		else
 		{
@@ -475,9 +531,16 @@ class USBPixI4ConverterPlugin : public DataConverterPlugin , public USBPixI4Conv
 	//This is called once at the beginning of each run.
 	//You may extract information from the BORE and/or configuration
 	//and store it in member variables to use during the decoding later.
-	virtual void Initialize(const Event& bore, const Configuration& /*cnf*/)
+	virtual void Initialize(const Event& bore, const Configuration& cnf)
 	{
-		this->getBOREparameters(bore);
+		this->getBOREparameters(bore, cnf);
+		cnf.SetSection("Producer.USBpix");
+		//cnf.Print();
+		//std::cout << cnf.Get("modules[200]","invalid") << std::endl;
+		//std::ofstream ofs;
+		//ofs.open ("test.txt", std::ofstream::out | std::ofstream::app);
+		//cnf.Save(ofs);
+		//ofs.close();
 	}
 
 	//This should return the trigger ID (as provided by the TLU)
@@ -625,12 +688,14 @@ class USBPixI4ConverterPlugin : public DataConverterPlugin , public USBPixI4Conv
 		if(this->advancedConfig.at(currently_handled_producer)) {
 			if(internalIDtoSensorID.count(currently_handled_producer*100+this->moduleConfig.at(currently_handled_producer).at(0)+chip_id_offset-1)>0){
 				previousSensorID = internalIDtoSensorID[currently_handled_producer*100+this->moduleConfig.at(currently_handled_producer).at(0)+chip_id_offset-1];
-				streamlog_out(DEBUG) << "USBPixI4 producer " << currently_handled_producer << " has already SensorID " << previousSensorID << " assigned to " << currently_handled_producer*100+this->moduleConfig.at(currently_handled_producer).at(0) << std::endl;
+				streamlog_out(DEBUG) << "USBPixI4 producer " << currently_handled_producer << " has already SensorID " << previousSensorID << " assigned to board assigned to sensor/module " << this->moduleIndex.at(currently_handled_producer).at(0) << " of board number " << this->moduleBoardIDs.at(currently_handled_producer).at(0) << std::endl;
+				streamlog_out(DEBUG) << "This is a module with " << this->moduleCount.at(currently_handled_producer).at(0) << " front end chips." << std::endl;
 			} else {
 				internalIDtoSensorID[currently_handled_producer*100+this->moduleConfig.at(currently_handled_producer).at(0)+chip_id_offset-1] = getNewlyAssignedSensorID(-1,20,"USBPIXI4",currently_handled_producer);
 				//std::cout << "#id: " << this->moduleConfig.at(currently_handled_producer).at(0)+chip_id_offset-1 << std::endl;
 				previousSensorID = internalIDtoSensorID[currently_handled_producer*100+this->moduleConfig.at(currently_handled_producer).at(0)+chip_id_offset-1];
-				streamlog_out(MESSAGE9) << "USBPixI4 producer " << currently_handled_producer << " got SensorID " << previousSensorID << " assigned to sensor/module at board" << currently_handled_producer*100+this->moduleConfig.at(currently_handled_producer).at(0) << std::endl;
+				streamlog_out(MESSAGE9) << "USBPixI4 producer " << currently_handled_producer << " got SensorID " << previousSensorID << " assigned to sensor/module " << this->moduleIndex.at(currently_handled_producer).at(0) << " of board number " << this->moduleBoardIDs.at(currently_handled_producer).at(0) << std::endl;
+				streamlog_out(MESSAGE9) << "This is a module with " << this->moduleCount.at(currently_handled_producer).at(0) << " front end chips." << std::endl;
 			}
 		}
 		else {
@@ -656,7 +721,7 @@ class USBPixI4ConverterPlugin : public DataConverterPlugin , public USBPixI4Conv
 
 		for(size_t chip = 0; chip < ev_raw.NumBlocks(); ++chip)
 		{
-			std::cout << "Chip: " << chip << " Modul: " << this->moduleConfig.at(currently_handled_producer).at(chip) << std::endl;
+			//std::cout << "Chip: " << chip << " Modul: " << this->moduleConfig.at(currently_handled_producer).at(chip) << std::endl;
 			const std::vector <unsigned char>& buffer=dynamic_cast<const std::vector<unsigned char>&> (ev_raw.GetBlock(chip));
 			
 			int sensorID = -1;
@@ -666,6 +731,8 @@ class USBPixI4ConverterPlugin : public DataConverterPlugin , public USBPixI4Conv
 				if(internalIDtoSensorID.count(currently_handled_producer*100+this->moduleConfig.at(currently_handled_producer).at(chip)+chip_id_offset-1)>0){
 					sensorID = internalIDtoSensorID[currently_handled_producer*100+this->moduleConfig.at(currently_handled_producer).at(chip)+chip_id_offset-1];
 					streamlog_out(DEBUG) << "USBPixI4 producer " << currently_handled_producer << " has already SensorID " << sensorID << " assigned to " << currently_handled_producer*100+this->moduleConfig.at(currently_handled_producer).at(chip) << std::endl;
+					streamlog_out(DEBUG) << "This is a module with " << this->moduleCount.at(currently_handled_producer).at(chip) << " front end chips." << std::endl;
+					//streamlog_out(DEBUG) << "chip ID " << chip  << std::endl;
 					//std::cout << "key: " << currently_handled_producer*100+this->moduleConfig.at(currently_handled_producer).at(0)+chip_id_offset-1 << std::endl;
 					//std::cout << "value: " << internalIDtoSensorID[currently_handled_producer*100+this->moduleConfig.at(currently_handled_producer).at(0)+chip_id_offset-1] << std::endl;
 					//std::cout << "sensorID " << sensorID << std::cout;
@@ -673,7 +740,9 @@ class USBPixI4ConverterPlugin : public DataConverterPlugin , public USBPixI4Conv
 					internalIDtoSensorID[currently_handled_producer*100+this->moduleConfig.at(currently_handled_producer).at(chip)+chip_id_offset-1] = getNewlyAssignedSensorID(-1,20,"USBPIXI4",currently_handled_producer);
 					sensorID = internalIDtoSensorID[currently_handled_producer*100+this->moduleConfig.at(currently_handled_producer).at(chip)+chip_id_offset-1];
 					streamlog_out(MESSAGE9) << "USBPixI4 producer " << currently_handled_producer << " got SensorID " << sensorID << " assigned to " << currently_handled_producer*100+this->moduleConfig.at(currently_handled_producer).at(chip) << std::endl;
+					streamlog_out(MESSAGE9) << "This is a module with " << this->moduleCount.at(currently_handled_producer).at(chip) << " front end chips." << std::endl;
 					//std::cout << "sensorID " << sensorID << std::cout;
+					//streamlog_out(MESSAGE9) << "chip ID " << chip  << std::endl;
 				}
 			}
 			else
@@ -729,6 +798,7 @@ class USBPixI4ConverterPlugin : public DataConverterPlugin , public USBPixI4Conv
 					//First Hit
 					if(this->getHitData(currently_handled_producer,Word, false, Col, Row, ToT))
 					{
+						//std::cout << "hit: " << Col << " " << Row << " will be transformed for Sensor " << sensorID << std::endl;
 						if(this->advancedConfig.at(currently_handled_producer)) this->transformChipsToModule(Col, Row, this->moduleIndex.at(currently_handled_producer).at(chip));
 						//std::cout << "hit: " << Col << " " << Row << " written in Sensor " << sensorID << std::endl;
 						eutelescope::EUTelGenericSparsePixel* thisHit = new eutelescope::EUTelGenericSparsePixel( Col, Row, ToT, lvl1-1);
