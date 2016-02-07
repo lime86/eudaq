@@ -11,6 +11,7 @@ branches:
   only:
     - master
     - v1.5-dev
+    - master_travis
 
 os:
   - linux
