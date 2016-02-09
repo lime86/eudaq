@@ -15,7 +15,7 @@ branches:
 
 os:
   - linux
-  # - osx
+  - osx
 
 before_install:
   - $CXX --version
