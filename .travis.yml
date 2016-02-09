@@ -20,7 +20,11 @@ os:
 before_install:
   - $CXX --version
   - $CC --version
-
+  
+  - wget https://root.cern.ch/download/root_v5.34.34.Linux-ubuntu14-x86_64-gcc4.8.tar.gz
+  - tar -xvf root_v5.34.34.Linux-ubuntu14-x86_64-gcc4.8.tar.gz
+  - locate root_v5.34.34.Linux-ubuntu14-x86_64-gcc4.8.tar.gz
+  - source root/bin/thisroot.sh 
   - if [ $TRAVIS_OS_NAME == linux ]; then sudo apt-get -qq update; fi
 
   # OS X: update brew cache:
