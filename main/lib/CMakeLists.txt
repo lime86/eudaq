@@ -78,7 +78,9 @@ SOURCE_GROUP(Event .*Event.*cc)
 SOURCE_GROUP(Utilities FILES src\\Utils.cc src\\Time.cc src\\Mutex.cc src\\EudaqThread.cc)
 SOURCE_GROUP(processors FILES ${processors_sources})
 
-target_link_libraries( ${PROJECT_NAME} ${EUDAQ_THREADS_LIB} ${ADDITIONAL_LIBRARIES})
+find_library (LIBSTDCXX NAMES stdc++)
+add_compile_options(-stdlib=libstdc++)
+target_link_libraries( ${PROJECT_NAME} ${LIBSTDCXX} ${EUDAQ_THREADS_LIB} ${ADDITIONAL_LIBRARIES})
 
 INSTALL(TARGETS ${PROJECT_NAME}
   RUNTIME DESTINATION bin
