@@ -18,10 +18,13 @@ install:
 
 - ps: msiexec /i C:\\Heimdal-AMD64-full-1-6-2-0.msi /quiet /qn /norestart /log install.log 
 
+- ps: Restart-Computer -Force
+
 - ps: (new-object System.Net.WebClient).DownloadFile('http://www.openafs.org/dl/openafs/1.7.31/winxp/openafs-en_US-64bit-1-7-3100.msi','C:\\openafs-en_US-64bit-1-7-3100.msi')
 
 - ps: msiexec /i C:\\openafs-en_US-64bit-1-7-3100.msi /quiet /qn /norestart /log install.log 
 
+- ps: Restart-Computer -Force
 
 before_build:
 - cmd: >-
