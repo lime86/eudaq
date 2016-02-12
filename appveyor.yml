@@ -9,6 +9,9 @@ configuration: Release
 environment:
   ROOTSYS: C:\root
   PATH: '%ROOTSYS%\bin;C:\Qt\5.5\msvc2013;C:\Python35;C:\Miniconda35;C:\Miniconda35\\Scripts;%PATH%'
+init:
+- ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+
 install:
 
 - ps: (new-object System.Net.WebClient).DownloadFile('https://www.secure-endpoints.com/binaries/heimdal/Heimdal-AMD64-full-1-6-2-0.msi','C:\\Heimdal-AMD64-full-1-6-2-0.msi')
@@ -43,3 +46,6 @@ before_build:
 build:
   project: C:/projects/eudaq/build/INSTALL.vcxproj
   verbosity: minimum
+
+on_finish:
+- ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
