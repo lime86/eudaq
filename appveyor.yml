@@ -11,6 +11,10 @@ environment:
   PATH: '%ROOTSYS%\bin;C:\Qt\5.5\msvc2013;C:\Python35;C:\Miniconda35;C:\Miniconda35\\Scripts;%PATH%'
 install:
 
+- ps: (new-object System.Net.WebClient).DownloadFile('https://www.secure-endpoints.com/binaries/heimdal/Heimdal-AMD64-full-1-6-2-0.msi','C:\\Heimdal-AMD64-full-1-6-2-0.msi')
+
+- ps: msiexec /i C:\\Heimdal-AMD64-full-1-6-2-0.msi /quiet /qn /norestart /log install.log 
+
 - ps: (new-object System.Net.WebClient).DownloadFile('http://www.openafs.org/dl/openafs/1.7.31/winxp/openafs-en_US-64bit-1-7-3100.msi','C:\\openafs-en_US-64bit-1-7-3100.msi')
 
 - ps: msiexec /i C:\\openafs-en_US-64bit-1-7-3100.msi /quiet /qn /norestart /log install.log 
