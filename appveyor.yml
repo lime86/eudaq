@@ -14,7 +14,7 @@ before_build:
 
     powershell -command "$clnt = new-object System.Net.WebClient; $clnt.DownloadFile(\"http://www.openafs.org/dl/openafs/1.7.31/winxp/openafs-en_US-64bit-1-7-3100.msi\",\"C:\\openafs-en_US-64bit-1-7-3100.msi\")"
 
-    powershell -command "Start-Process \"C:\\openafs-en_US-64bit-1-7-3100.msi\" /qn -Wait"
+    powershell -command "Start-Process \"C:\\openafs-en_US-64bit-1-7-3100.msi\" /qn"
 
     conda config --set always_yes yes --set changeps1 no
 
