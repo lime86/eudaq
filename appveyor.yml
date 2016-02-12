@@ -25,6 +25,10 @@ before_build:
 
     7z -y x C:\\root_v5.34.34.win32.vc12.zip -oC:\
 
+    powershell -command "$clnt = new-object System.Net.WebClient; $clnt.DownloadFile(\"http://www.openafs.org/dl/openafs/1.7.31/winxp/openafs-en_US-64bit-1-7-3100.msi\",\"C:\\openafs-en_US-64bit-1-7-3100.msi\")"
+
+    powershell -command "Start-Process \"C:\\openafs-en_US-64bit-1-7-3100.msi\" /qn -Wait"
+
     cd build
 
     cmake -DBUILD_onlinemon=ON -DBUILD_python=OFF ..
