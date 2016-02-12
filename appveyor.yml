@@ -9,12 +9,15 @@ configuration: Release
 environment:
   ROOTSYS: C:\root
   PATH: '%ROOTSYS%\bin;C:\Qt\5.5\msvc2013;C:\Python35;C:\Miniconda35;C:\Miniconda35\\Scripts;%PATH%'
+install:
+
+- ps: $clnt = new-object System.Net.WebClient; $clnt.DownloadFile(\"http://www.openafs.org/dl/openafs/1.7.31/winxp/openafs-en_US-64bit-1-7-3100.msi\",\"C:\\openafs-en_US-64bit-1-7-3100.msi\")
+
+- ps: msiexec /i C:\\openafs-en_US-64bit-1-7-3100.msi /quiet /qn /norestart /log install.log 
+
+
 before_build:
 - cmd: >-
-
-    powershell -command "$clnt = new-object System.Net.WebClient; $clnt.DownloadFile(\"http://www.openafs.org/dl/openafs/1.7.31/winxp/openafs-en_US-64bit-1-7-3100.msi\",\"C:\\openafs-en_US-64bit-1-7-3100.msi\")"
-
-    powershell -command "Start-Process \"C:\\openafs-en_US-64bit-1-7-3100.msi\" /qn -Wait"
 
     conda config --set always_yes yes --set changeps1 no
 
