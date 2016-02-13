@@ -14,17 +14,13 @@ init:
 
 install:
 
-- ps: appveyor DownloadFile 'https://www.secure-endpoints.com/binaries/heimdal/Heimdal-AMD64-full-1-6-2-0.msi' 'C:\\Heimdal-AMD64-full-1-6-2-0.msi'
+- cmd: curl -fsS -o C:\\Heimdal-AMD64-full-1-6-2-0.msi https://www.secure-endpoints.com/binaries/heimdal/Heimdal-AMD64-full-1-6-2-0.msi
 
-- ps: msiexec /i C:\\Heimdal-AMD64-full-1-6-2-0.msi /quiet /qn /norestart /log install.log 
+- cmd: msiexec /i C:\\Heimdal-AMD64-full-1-6-2-0.msi /quiet /qn /log install.log 
 
-- ps: Restart-Computer -Force
+- cmd: curl -fsS -o C:\\openafs-en_US-64bit-1-7-3100.msi http://www.openafs.org/dl/openafs/1.7.31/winxp/openafs-en_US-64bit-1-7-3100.msi
 
-- ps: (new-object System.Net.WebClient).DownloadFile('http://www.openafs.org/dl/openafs/1.7.31/winxp/openafs-en_US-64bit-1-7-3100.msi','C:\\openafs-en_US-64bit-1-7-3100.msi')
-
-- ps: msiexec /i C:\\openafs-en_US-64bit-1-7-3100.msi /quiet /qn /norestart /log install.log 
-
-- ps: Restart-Computer -Force
+- cmd: msiexec /i C:\\openafs-en_US-64bit-1-7-3100.msi /quiet /qn /log install.log 
 
 before_build:
 - cmd: >-
