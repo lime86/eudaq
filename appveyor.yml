@@ -22,6 +22,8 @@ install:
 
 - cmd: msiexec /i C:\\openafs-en_US-64bit-1-7-3100.msi /quiet /qn /log install.log 
 
+- ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+
 before_build:
 - cmd: >-
 
