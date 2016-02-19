@@ -34,7 +34,7 @@ install:
   - if [ $TRAVIS_OS_NAME == linux ]; then sudo apt-get install -y libusb-1.0-0 libusb-1.0-0-dev python2.7 python-numpy cmake qt4-dev-tools; fi
 
   # Install package dependencies for Mac OS X:
-  - if [ $TRAVIS_OS_NAME == osx ]; then brew install python libusb homebrew/science/root; fi
+  - if [ $TRAVIS_OS_NAME == osx ]; then brew install cmake python libusb homebrew/science/root; fi
   # Install numpy via pip:
   - if [ $TRAVIS_OS_NAME == osx ]; then easy_install pip && pip install numpy; fi
 
