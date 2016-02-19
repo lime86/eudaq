@@ -16,8 +16,6 @@ LIST ( APPEND CMAKE_LD_FLAGS "-fPIC" )
 include(${PROJECT_SOURCE_DIR}/cmake/CMakeCompatibility.cmake)
 
 # Determine platform- and compiler-specific settings
-set (CMAKE_CXX_STANDARD 11)
-set_property (GLOBAL PROPERTY CXX_STANDARD_REQUIRED ON)
 include(${PROJECT_SOURCE_DIR}/cmake/Platform.cmake)
 
 # Check if this is a source tarball build

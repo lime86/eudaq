@@ -1,7 +1,8 @@
 # Determine platform- and compiler-specific settings
 
-# check for and activate c++11 support
-
+# demand c++11 support
+set (CMAKE_CXX_STANDARD 11)
+set_property (GLOBAL PROPERTY CXX_STANDARD_REQUIRED ON)
 
 # platform dependent preprocessor defines
 if (WIN32)
