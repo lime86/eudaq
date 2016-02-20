@@ -89,13 +89,13 @@ void TGraphSet::Redraw(TCanvas *canvas) {
   _sizegraph->Draw("AP");
   option = "SAME";
   if (_selection.size() != 0) {
-    for (int i = 0; i < _selection.size(); ++i) {
+    for (std::size_t i = 0; i < _selection.size(); ++i) {
       _selection.at(i)->Draw(option.c_str());
 
       std::cout << "HERE2" << std::endl;
     }
   } else {
-    for (int i = 0; i < _graphs.size(); ++i) {
+    for (std::size_t i = 0; i < _graphs.size(); ++i) {
       _graphs.at(i)->Draw(option.c_str());
 
       std::cout << "HERE" << std::endl;
