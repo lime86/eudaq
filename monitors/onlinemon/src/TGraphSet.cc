@@ -13,7 +13,7 @@ TGraphSet::TGraphSet()
 
 TGraphSet::~TGraphSet() {
   delete _sizegraph;
-  for (int i = 0; i < _graphs.size(); ++i) {
+  for (std::size_t i = 0; i < _graphs.size(); ++i) {
     delete _graphs.at(i);
   }
 }
@@ -66,7 +66,7 @@ void TGraphSet::AddPoint(const std::string name, const double time,
 
 void TGraphSet::SelectGraphs(const std::vector<std::string> select) {
   _selection.clear();
-  for (int i = 0; i < select.size(); ++i) {
+  for (std::size_t i = 0; i < select.size(); ++i) {
     _selection.push_back(GetTGraph(select.at(i)));
   }
 }
