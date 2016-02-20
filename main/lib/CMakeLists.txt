@@ -19,7 +19,8 @@ IF(USE_LCIO)
   add_definitions(${LCIO_DEFINITIONS})
 ENDIF(USE_LCIO)
 
-AUX_SOURCE_DIRECTORY( src ../include/eudaq/ library_sources )
+AUX_SOURCE_DIRECTORY( src library_sources )
+AUX_SOURCE_DIRECTORY( ../include/eudaq/ library_sources )
 AUX_SOURCE_DIRECTORY( plugins plugins_sources )
 AUX_SOURCE_DIRECTORY( processors processors_sources )
 
