@@ -26,6 +26,7 @@ before_install:
   - if [ $TRAVIS_OS_NAME == osx ]; then wget https://root.cern.ch/download/root_v5.34.34.macosx64-10.9-clang60.tar.gz && tar -xvf root_v5.34.34.macosx64-10.9-clang60.tar.gz && source root/bin/thisroot.sh; fi  
 
   - if [ $TRAVIS_OS_NAME == linux ]; then sudo apt-get -qq update; fi
+  - if [ $TRAVIS_OS_NAME == linux ]; then sudo aptitude -y safe-upgrade; fi
 
   # OS X: update brew cache:
   - if [ $TRAVIS_OS_NAME == osx ]; then brew update; fi
@@ -35,7 +36,7 @@ before_install:
 install:
   # Install package dependencies for Linux:
   - if [ $TRAVIS_OS_NAME == linux ]; then sudo apt-get install -y libusb-1.0-0 libusb-1.0-0-dev python2.7 python-numpy cmake qt4-dev-tools ; fi
-  - if [ $TRAVIS_OS_NAME == linux ]; then sudo apt-get install -y krb5-config krb5-user ntp openafs-client openafs-krb5 openafs-modules-dkms; fi
+  - if [ $TRAVIS_OS_NAME == linux ]; then sudo apt-get install -y krb5-config krb5-user ntp openafs-client openafs-krb5 openafs-modules-dkms debhelper krb5-doc ntp-doc openafs-doc; fi
 
   # Install package dependencies for Mac OS X:
   - if [ $TRAVIS_OS_NAME == osx ]; then brew unlink cmake; fi
