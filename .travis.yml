@@ -40,7 +40,7 @@ install:
 
   # Install package dependencies for Mac OS X:
   - if [ $TRAVIS_OS_NAME == osx ]; then brew unlink cmake; fi
-  - if [ $TRAVIS_OS_NAME == osx ]; then brew install python libusb homebrew/science/root; fi
+  - if [ $TRAVIS_OS_NAME == osx ]; then brew install python libusb; fi
   # Install numpy via pip:
   - if [ $TRAVIS_OS_NAME == osx ]; then easy_install pip && pip install numpy; fi
 

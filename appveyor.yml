@@ -5,6 +5,7 @@ branches:
   only:
   - master
   - v1.5-dev
+  - master_test
 
 os: Visual Studio 2013
 configuration: Release
