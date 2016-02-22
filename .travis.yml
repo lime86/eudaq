@@ -35,7 +35,7 @@ before_install:
   
 install:
   # Install package dependencies for Linux:
-  - if [ $TRAVIS_OS_NAME == linux ]; then sudo apt-get install -y libusb-1.0-0 libusb-1.0-0-dev python2.7 python-numpy cmake qt4-dev-tools ; fi
+  - if [ $TRAVIS_OS_NAME == linux ]; then sudo apt-get install -y libusb-1.0-0 libusb-1.0-0-dev python2.7 python-numpy cmake qt4-dev-tools dkms build-essential; fi
   - if [ $TRAVIS_OS_NAME == linux ]; then sudo apt-get install -y linux-headers-$(uname -r) krb5-config krb5-user ntp openafs-client openafs-krb5 openafs-modules-dkms debhelper krb5-doc ntp-doc openafs-doc; fi
   #   - if [ $TRAVIS_OS_NAME == linux ]; then sudo module-assistant prepare && sudo module-assistant auto-install openafs && sudo modprobe openafs && sudo dpkg-reconfigure -f noninteractive krb5-config openafs-client; fi
 
