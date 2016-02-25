@@ -73,7 +73,7 @@ ENDIF()
 
 # include directories
 INCLUDE_DIRECTORIES( ./main/include )
-INCLUDE_DIRECTORIES( ./extern/jsoncons-0.93/src )
+INCLUDE_DIRECTORIES( ./extern/jsoncons-0.98.4/src )
 
 # additional packages to be searched for by cmake
 LIST( APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake )
