@@ -54,7 +54,7 @@ void KeysightScopeController::Configure(const eudaq::Configuration & /*param*/) 
 void KeysightScopeController::TagsSetting() {
   // ev.SetTag("DET", 12);
 }
-void KeysightScopeController::GetProduserHostInfo() {
+void KeysightScopeController::GetProducerHostInfo() {
   /*** get Producer information, NAME and INET ADDRESS ***/
   gethostname(ThisHost, MAXHOSTNAME);
   printf("----TCP/Producer running at host NAME: %s\n", ThisHost);

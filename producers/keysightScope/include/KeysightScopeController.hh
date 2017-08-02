@@ -39,7 +39,7 @@ public:
   KeysightScopeController();
   void Configure(const eudaq::Configuration &conf);
   virtual ~KeysightScopeController();
-  void GetProduserHostInfo();
+  void GetProducerHostInfo();
   void Start();
   void Stop();
   void TagsSetting();
