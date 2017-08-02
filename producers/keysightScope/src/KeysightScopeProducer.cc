@@ -29,15 +29,15 @@ public:
       }
       if (running) {
 
-        datalength1 = ni_control->DataTransportClientSocket_ReadLength("priv");
+        datalength1 = scope_control->DataTransportClientSocket_ReadLength("priv");
         std::vector<unsigned char> mimosa_data_0(datalength1);
         mimosa_data_0 =
-            ni_control->DataTransportClientSocket_ReadData(datalength1);
+            scope_control->DataTransportClientSocket_ReadData(datalength1);
 
-        datalength2 = ni_control->DataTransportClientSocket_ReadLength("priv");
+        datalength2 = scope_control->DataTransportClientSocket_ReadLength("priv");
         std::vector<unsigned char> mimosa_data_1(datalength2);
         mimosa_data_1 =
-            ni_control->DataTransportClientSocket_ReadData(datalength2);
+            scope_control->DataTransportClientSocket_ReadData(datalength2);
 
         eudaq::RawDataEvent ev("NI", m_run, m_ev++);
         ev.AddBlock(0, mimosa_data_0);
@@ -47,16 +47,18 @@ public:
 
     } while (!done);
   }
+  virtual void OnInitialize(const eudaq::Configuration &param) {
+  }	  
   virtual void OnConfigure(const eudaq::Configuration &param) {
 
     unsigned char configur[5] = "conf";
 
     try {
       if (!configure) {
-        ni_control = std::make_shared<KeysightScopeController>();
-        ni_control->GetProduserHostInfo();
-        ni_control->ConfigClientSocket_Open(param);
-        ni_control->DatatransportClientSocket_Open(param);
+        scope_control = std::make_shared<KeysightScopeController>();
+        scope_control->GetProducerHostInfo();
+        scope_control->ConfigClientSocket_Open(param);
+        scope_control->DatatransportClientSocket_Open(param);
         std::cout << " " << std::endl;
         configure = true;
       }
@@ -86,12 +88,12 @@ public:
       conf_parameters[8] = NumBoards;
       conf_parameters[9] = FPGADownload;
 
-      ni_control->ConfigClientSocket_Send(configur, sizeof(configur));
-      ni_control->ConfigClientSocket_Send(conf_parameters,
+      scope_control->ConfigClientSocket_Send(configur, sizeof(configur));
+      scope_control->ConfigClientSocket_Send(conf_parameters,
                                           sizeof(conf_parameters));
 
-      ConfDataLength = ni_control->ConfigClientSocket_ReadLength("priv");
-      ConfDataError = ni_control->ConfigClientSocket_ReadData(ConfDataLength);
+      ConfDataLength = scope_control->ConfigClientSocket_ReadLength("priv");
+      ConfDataError = scope_control->ConfigClientSocket_ReadData(ConfDataLength);
 
       NiConfig = false;
 
@@ -171,7 +173,7 @@ public:
       SendEvent(ev);
       eudaq::mSleep(500);
 
-      ni_control->Start();
+      scope_control->Start();
       running = true;
 
       SetConnectionState(eudaq::ConnectionState::STATE_RUNNING, "Started");
@@ -187,7 +189,7 @@ public:
     try {
       std::cout << "Stop Run" << std::endl;
 
-      ni_control->Stop();
+      scope_control->Stop();
       eudaq::mSleep(5000);
       running = false;
       eudaq::mSleep(100);
@@ -207,8 +209,8 @@ public:
   virtual void OnTerminate() {
     std::cout << "Terminate (press enter)" << std::endl;
     done = true;
-    ni_control->DatatransportClientSocket_Close();
-    ni_control->ConfigClientSocket_Close();
+    scope_control->DatatransportClientSocket_Close();
+    scope_control->ConfigClientSocket_Close();
     eudaq::mSleep(1000);
   }
 
@@ -216,7 +218,7 @@ private:
   unsigned m_run, m_ev;
   bool done, running, stopping, configure;
   struct timeval tv;
-  std::shared_ptr<KeysightScopeController> ni_control;
+  std::shared_ptr<KeysightScopeController> scope_control;
 
   char *Buffer1;
   unsigned int datalength1;
@@ -276,7 +278,7 @@ int main(int /*argc*/, const char **argv) {
   eudaq::Option<std::string> level(
       op, "l", "log-level", "NONE", "level",
       "The minimum level for displaying log messages locally");
-  eudaq::Option<std::string> name(op, "n", "name", "NI", "string",
+  eudaq::Option<std::string> name(op, "n", "name", "KeysightScope", "string",
                                   "The name of this Producer");
   try {
     op.Parse(argv);

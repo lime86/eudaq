@@ -1,12 +1,12 @@
-set(name "KeysightScopeProducer")
-set(sourcefiles src/KeysightScopeProducer.cc src/KeysightScopeController.cc)
-
 INCLUDE_DIRECTORIES( include )
-add_executable(${name} ${sourcefiles})
 
-target_link_libraries(${name}   EUDAQ ${EUDAQ_THREADS_LIB})
+#add_executable(KeysightScopeControl src/KeysightScopeControl.cxx src/KeysightScopeController.cc)
+add_executable(KeysightScopeProducer src/KeysightScopeProducer.cc src/KeysightScopeController.cc)
 
-INSTALL(TARGETS ${name}
+#target_link_libraries(KeysightScopeControl EUDAQ ${EUDAQ_THREADS_LIB})
+target_link_libraries(KeysightScopeProducer EUDAQ ${EUDAQ_THREADS_LIB})
+
+INSTALL(TARGETS KeysightScopeProducer
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib)
