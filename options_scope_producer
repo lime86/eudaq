@@ -1,0 +1,29 @@
+1.) Enable Vetoing: Raise clock line outside of handshake in order to stop data taking
+	a) Mandatory: Choose output for clock: AUX, Serial, USB
+	b) Optional: Listen to SPS spill signal in order to try to have it read during inter spill
+	c) Optional: Listen to trigger ID on another/same channel
+		i) Mandatory: Choose input for ID: Channel, Serial, USB
+2.) Enable trigger/busy
+	a) Mandatory: Choose output for busy: AUX, Serial, USB
+	b) Optional: Use for readout stop (sufficiently early?)
+		i) Optional: Listen to SPS spill signal in order to try to have it read during inter spill
+	c) Optional: Listen to trigger ID on another/same channel
+		i) Mandatory: Choose input for ID: Channel, Serial, USB
+3.) Enable trigger vetoing: NIM high on trigger input configured as veto
+	a) Mandatory: Choose output for clock: AUX, Serial, USB
+	b) Optional: Listen to SPS spill signal in order to try to have it read during inter spill
+	c) Optional: Listen to trigger ID on another/same channel
+		i) Mandatory: Choose input for ID: Channel, Serial, USB
+General:
+	Assign inputs and outputs:
+		output[tlu_clock_input]=AUX, Serial, USB
+		output[tlu_trigger_in_as_veto]=AUX, Serial, USB
+		input[tlu_trigger_out] = AUX, Serial, USB
+		
+	MultiScope configuration/timing estimation?
+	Time/Date setting
+	Download full config
+	Upload full config?
+	Configure individual settings / configure individual settings partially / try traditional estimate of activated channels and leave all settings
+	
+	
