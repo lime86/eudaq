@@ -48,9 +48,11 @@ unsigned char stop[5] = "stop";
 KeysightScopeController::KeysightScopeController() {
   // NI_IP = "192.76.172.199";
 }
-void KeysightScopeController::Configure(const eudaq::Configuration & /*param*/) {
-  // NiIPaddr = param.Get("NiIPaddr", "");
+
+SetConfigForScope(const config_details_for_one_scope_type conf) {
+	
 }
+
 void KeysightScopeController::TagsSetting() {
   // ev.SetTag("DET", 12);
 }

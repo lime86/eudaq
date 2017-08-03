@@ -33,12 +33,18 @@ using eudaq::to_string;
 #define START 0x1254
 #define STOP 0x1255
 
+struct config_details_for_one_scope_type {
+	std::string IPaddr;
+	unsigned int Port;
+ };
+  
 class KeysightScopeController {
 
 public:
-  KeysightScopeController();
-  void Configure(const eudaq::Configuration &conf);
-  virtual ~KeysightScopeController();
+	KeysightScopeController();
+	SetConfigForScope(const config_details_for_one_scope_type conf);
+	virtual ~KeysightScopeController();
+
   void GetProducerHostInfo();
   void Start();
   void Stop();
