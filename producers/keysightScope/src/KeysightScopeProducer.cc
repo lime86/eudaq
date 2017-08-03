@@ -14,12 +14,12 @@ using eudaq::RawDataEvent;
 class KeysightScopeProducer : public eudaq::Producer {
 public:
   KeysightScopeProducer(const std::string &runcontrol)
-      : eudaq::Producer("MimosaNI", runcontrol), done(false), running(false),
+      : eudaq::Producer("KeysightScope", runcontrol), done(false), running(false),
         stopping(false) {
 
     configure = false;
 
-    std::cout << "NI Producer was started successful " << std::endl;
+    std::cout << "Keysight Scope Producer was started successful " << std::endl;
   }
   void MainLoop() {
     do {
@@ -47,7 +47,10 @@ public:
 
     } while (!done);
   }
-  virtual void OnInitialize(const eudaq::Configuration &param) {
+  virtual void OnInitialise(const eudaq::Configuration &init) {
+        std::cout << "... was Initialized " << init.Name() << " " << std::endl;
+        EUDAQ_INFO("Initialised (" + init.Name() + ")");
+        SetConnectionState(eudaq::ConnectionState::STATE_UNCONF, "Initialised (" + init.Name() + ")");	  
   }	  
   virtual void OnConfigure(const eudaq::Configuration &param) {
 

@@ -256,9 +256,9 @@ void HitmapHistos::Fill(const SimpleStandardHit &hit) {
   //hotpixels have been determined
   {
     char sectionid[3];
-    sprintf(sectionid, "%i%c", _id,
-            (pixel_x / _mon->mon_configdata.getMimosa26_section_boundary()) +
-                65); // determine section label
+//    sprintf(sectionid, "%i%c", _id,
+//            (pixel_x / _mon->mon_configdata.getMimosa26_section_boundary()) +
+//                65); // determine section label
     _hitmapSections->Fill(sectionid,
                           1); // add one hit to the corresponding section bin
     // tab[pixel_x/_mon->mon_configdata.getMimosa26_section_boundary()]++;
