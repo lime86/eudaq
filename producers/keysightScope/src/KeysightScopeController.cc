@@ -49,59 +49,56 @@ KeysightScopeController::KeysightScopeController() {
   // NI_IP = "192.76.172.199";
 }
 
-SetConfigForScope(const config_details_for_one_scope_type conf) {
+void KeysightScopeController::SetConfigForScope(const config_details_for_one_scope_type conf) {
 	
 }
 
-void KeysightScopeController::TagsSetting() {
-  // ev.SetTag("DET", 12);
+void KeysightScopeController::SetAddress(std::string address) {
+	m_ScopeAddress = address;
 }
-void KeysightScopeController::GetProducerHostInfo() {
-  /*** get Producer information, NAME and INET ADDRESS ***/
-  gethostname(ThisHost, MAXHOSTNAME);
-  printf("----TCP/Producer running at host NAME: %s\n", ThisHost);
-  hclient = gethostbyname(ThisHost);
-  if (hclient != 0) {
-    EUDAQ_BCOPY(hclient->h_addr, &(client.sin_addr), hclient->h_length);
-    printf("----TCP/Producer INET ADDRESS is: %s \n",
-           inet_ntoa(client.sin_addr));
-  } else {
-    printf("----TCP/Producer -- Warning! -- failed at executing "
-           "gethostbyname() for: %s. Check your /etc/hosts list \n",
-           ThisHost);
-  }
+
+void KeysightScopeController::SetPort(std::string port) {
+	m_config_socket_port = port;
 }
-void KeysightScopeController::Start() { ConfigClientSocket_Send(start, sizeof(start)); }
-void KeysightScopeController::Stop() { ConfigClientSocket_Send(stop, sizeof(stop)); }
 
-void KeysightScopeController::ConfigClientSocket_Open(const eudaq::Configuration &param) {
-  /*** Network configuration for NI, NAME and INET ADDRESS ***/
+std::string KeysightScopeController::GetIdentification() {
+	
+}
 
-  std::string m_server;
-  m_server = param.Get("NiIPaddr", "");
-
-  std::string m_config_socket_port;
-  m_config_socket_port = param.Get("NiConfigSocketPort", "49248");
-
+void KeysightScopeController::OpenConnection()
+{
+	
   // convert string in config into IPv4 address
-  hostent *host = gethostbyname(m_server.c_str());
+  hostent *host = gethostbyname(m_ScopeAddress.c_str());
   if (!host) {
-    EUDAQ_ERROR("ConfSocket: Bad NiIPaddr value in config file: must be legal "
+    EUDAQ_ERROR("ConfSocket: Bad Scope IPaddr value in config file: must be legal "
                 "IPv4 address!");
-    perror("ConfSocket: Bad NiIPaddr value in config file: must be legal IPv4 "
+    perror("ConfSocket: Bad Scope IPaddr value in config file: must be legal IPv4 "
            "address: ");
   }
-  memcpy((char *)&config.sin_addr.s_addr, host->h_addr_list[0], host->h_length);
-
-  if ((sock_config = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
+  
+  if ((sock_config = socket(AF_INET, SOCK_STREAM, 0)) == -1){
     EUDAQ_ERROR("ConfSocket: Error creating the TCP socket  ");
     perror("ConfSocket Error: socket()");
     exit(1);
-  } else
-    printf("----TCP/NI crate: SOCKET is OK...\n");
+  } else {
+	  printf("----TCP/Scope: SOCKET is OK...\n");
+  }
 
-  printf("----TCP/NI crate INET ADDRESS is: %s \n", inet_ntoa(config.sin_addr));
-  printf("----TCP/NI crate INET PORT is: %s \n", m_config_socket_port.c_str());
+  /* --- connect to the scope */
+  
+  /*sa_scope[0].sin_addr = *((struct in_addr *)he->h_addr);
+  bzero(sa_scope[0].sin_zero, 8);
+  if (connect(sock_config, (struct sockaddr *)&sa_scope[0],
+	      sizeof(struct sockaddr)) == -1){
+    perror(HOST);
+    exit(1);
+  }*/
+  
+  memcpy((char *)&config.sin_addr.s_addr, host->h_addr_list[0], host->h_length);
+  
+  printf("----TCP/Scopa INET ADDRESS is: %s \n", inet_ntoa(config.sin_addr));
+  printf("----TCP/Scope INET PORT is: %s \n", m_config_socket_port.c_str());
 
   config.sin_family = AF_INET;
   int i_auto = std::stoi(m_config_socket_port, nullptr, 10);
@@ -109,221 +106,20 @@ void KeysightScopeController::ConfigClientSocket_Open(const eudaq::Configuration
   memset(&(config.sin_zero), '\0', 8);
   if (connect(sock_config, (struct sockaddr *)&config,
               sizeof(struct sockaddr)) == -1) {
-    EUDAQ_ERROR("ConfSocket: National Instruments crate doesn't appear to be "
+    EUDAQ_ERROR("ConfSocket: Scope doesn't appear to be "
                 "running  ");
     perror("ConfSocket Error: connect()");
     EUDAQ_Sleep(60);
     exit(1);
   } else
-    printf("----TCP/NI crate The CONNECT is OK...\n");
+    printf("----TCP/Scope The CONNECT is OK...\n");
+  
 }
-void KeysightScopeController::ConfigClientSocket_Send(unsigned char *text, size_t len) {
-  bool dbg = false;
-  if (dbg)
-    printf("size=%zu", len);
 
-  if (EUDAQ_SEND(sock_config, text, len, 0) == -1)
-    perror("Server-send() error lol!");
-}
-void KeysightScopeController::ConfigClientSocket_Close() {
-
+void KeysightScopeController::CloseConnection() {
   EUDAQ_CLOSE_SOCKET(sock_config);
 }
-unsigned int
-KeysightScopeController::ConfigClientSocket_ReadLength(const char * /*string[4]*/) {
-  unsigned int datalengthTmp;
-  unsigned int datalength;
-  int i;
-  bool dbg = false;
-  if ((numbytes = recv(sock_config, Buffer_length, 2, 0)) == -1) {
-    EUDAQ_ERROR("DataTransportSocket: Read length error ");
-    perror("recv()");
-    exit(1);
-  } else {
-    if (dbg)
-      printf("|==ConfigClientSocket_ReadLength ==|    numbytes=%u \n",
-             static_cast<uint32_t>(numbytes));
-    i = 0;
-    if (dbg) {
-      while (i < numbytes) {
-        printf(" 0x%x%x", 0xFF & Buffer_length[i], 0xFF & Buffer_length[i + 1]);
-        i = i + 2;
-      }
-    }
-    datalengthTmp = 0;
-    datalengthTmp = 0xFF & Buffer_length[0];
-    datalengthTmp <<= 8;
-    datalengthTmp += 0xFF & Buffer_length[1];
-    datalength = datalengthTmp;
 
-    if (dbg)
-      printf(" data= %d", datalength);
-    if (dbg)
-      printf("\n");
-  }
-  return datalength;
-}
-std::vector<unsigned char>
-KeysightScopeController::ConfigClientSocket_ReadData(int datalength) {
-  std::vector<unsigned char> ConfigData(datalength);
-  unsigned int stored_bytes;
-  unsigned int read_bytes_left;
-  unsigned int i;
-  bool dbg = false;
-
-  stored_bytes = 0;
-  read_bytes_left = datalength;
-  while (read_bytes_left > 0) {
-    if ((numbytes = recv(sock_config, Buffer_data, read_bytes_left, 0)) == -1) {
-      EUDAQ_ERROR("|==ConfigClientSocket_ReadLength==| Read data error ");
-      perror("recv()");
-      exit(1);
-    } else {
-      if (dbg)
-        printf("|==ConfigClientSocket_ReadLength==|    numbytes=%u \n",
-               static_cast<uint32_t>(numbytes));
-      read_bytes_left = read_bytes_left - numbytes;
-      for (int k = 0; k < numbytes; k++) {
-        ConfigData[stored_bytes] = Buffer_data[k];
-        stored_bytes++;
-      }
-      i = 0;
-      if (dbg) {
-        while ((int)i < numbytes) {
-          printf(" 0x%x \n", 0xFF & Buffer_data[i]);
-          i++;
-        }
-      }
-    }
-  }
-  if (dbg)
-    printf("\n");
-  return ConfigData;
-}
-
-void KeysightScopeController::DatatransportClientSocket_Open(
-    const eudaq::Configuration &param) {
-  /*** Creation for the data transmit socket, NAME and INET ADDRESS ***/
-  std::string m_server;
-  m_server = param.Get("NiIPaddr", "");
-
-  std::string m_data_transport_socket_port;
-  m_data_transport_socket_port =
-      param.Get("NiDataTransportSocketPort", "49250");
-
-  // convert string in config into IPv4 address
-  hostent *host = gethostbyname(m_server.c_str());
-  if (!host) {
-    EUDAQ_ERROR("ConfSocket: Bad NiIPaddr value in config file: must be legal "
-                "IPv4 address!");
-    perror("ConfSocket: Bad NiIPaddr value in config file: must be legal IPv4 "
-           "address: ");
-  }
-  memcpy((char *)&datatransport.sin_addr.s_addr, host->h_addr_list[0],
-         host->h_length);
-
-  if ((sock_datatransport = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
-    EUDAQ_ERROR("DataTransportSocket: Error creating socket ");
-    perror("DataTransportSocket Error: socket()");
-    exit(1);
-  } else
-    printf("----TCP/NI crate DATA TRANSPORT: The SOCKET is OK...\n");
-
-  printf("----TCP/NI crate DATA TRANSPORT INET ADDRESS is: %s \n",
-         inet_ntoa(datatransport.sin_addr));
-  printf("----TCP/NI crate DATA TRANSPORT INET PORT is: %s \n",
-         m_data_transport_socket_port.c_str());
-
-  datatransport.sin_family = AF_INET;
-  int i_auto = std::stoi(m_data_transport_socket_port, nullptr, 10);
-  datatransport.sin_port = htons(i_auto);
-  memset(&(datatransport.sin_zero), '\0', 8);
-  if (connect(sock_datatransport, (struct sockaddr *)&datatransport,
-              sizeof(struct sockaddr)) == -1) {
-    EUDAQ_ERROR("DataTransportSocket: National Instruments crate doesn't "
-                "appear to be running  ");
-    perror("DataTransportSocket: connect()");
-    EUDAQ_Sleep(60);
-    exit(1);
-  } else
-    printf("----TCP/NI crate DATA TRANSPORT: The CONNECT executed OK...\n");
-}
-unsigned int
-KeysightScopeController::DataTransportClientSocket_ReadLength(const char * /*string[4]*/) {
-  unsigned int datalengthTmp;
-  unsigned int datalength;
-  int i;
-  bool dbg = false;
-  if ((numbytes = recv(sock_datatransport, Buffer_length, 2, 0)) == -1) {
-    EUDAQ_ERROR("DataTransportSocket: Read length error ");
-    perror("recv()");
-    exit(1);
-  } else {
-    if (dbg)
-      printf("|==DataTransportClientSocket_ReadLength ==|    numbytes=%u \n",
-             static_cast<uint32_t>(numbytes));
-    i = 0;
-    if (dbg) {
-      while (i < numbytes) {
-        printf(" 0x%x%x", 0xFF & Buffer_length[i], 0xFF & Buffer_length[i + 1]);
-        i = i + 2;
-      }
-    }
-    datalengthTmp = 0;
-    datalengthTmp = 0xFF & Buffer_length[0];
-    datalengthTmp <<= 8;
-    datalengthTmp += 0xFF & Buffer_length[1];
-    datalength = datalengthTmp;
-
-    if (dbg)
-      printf(" data= %d", datalength);
-    if (dbg)
-      printf("\n");
-  }
-  return datalength;
-}
-std::vector<unsigned char>
-KeysightScopeController::DataTransportClientSocket_ReadData(int datalength) {
-
-  std::vector<unsigned char> mimosa_data(datalength);
-  unsigned int stored_bytes;
-  unsigned int read_bytes_left;
-  unsigned int i;
-  bool dbg = false;
-
-  stored_bytes = 0;
-  read_bytes_left = datalength;
-  while (read_bytes_left > 0) {
-    if ((numbytes =
-             recv(sock_datatransport, Buffer_data, read_bytes_left, 0)) == -1) {
-      EUDAQ_ERROR("DataTransportSocket: Read data error ");
-      perror("recv()");
-      exit(1);
-    } else {
-      if (dbg)
-        printf("|==DataTransportClientSocket_ReadData==|    numbytes=%u \n",
-               static_cast<uint32_t>(numbytes));
-      read_bytes_left = read_bytes_left - numbytes;
-      for (int k = 0; k < numbytes; k++) {
-        mimosa_data[stored_bytes] = Buffer_data[k];
-        stored_bytes++;
-      }
-      i = 0;
-      if (dbg) {
-        while ((int)i < numbytes) {
-          printf(" 0x%x%x", 0xFF & Buffer_data[i], 0xFF & Buffer_data[i + 1]);
-          i = i + 2;
-        }
-      }
-    }
-  }
-  if (dbg)
-    printf("\n");
-  return mimosa_data;
-}
-void KeysightScopeController::DatatransportClientSocket_Close() {
-  EUDAQ_CLOSE_SOCKET(sock_datatransport);
-}
 KeysightScopeController::~KeysightScopeController() {
-  //
+  CloseConnection();
 }
