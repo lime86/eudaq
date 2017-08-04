@@ -116,6 +116,19 @@ void KeysightScopeController::OpenConnection()
   
 }
 
+int KeysightScopeController::Write(char* buf){
+  int val;
+  int len = strlen(buf);
+  if ( != 0){ //if scope?configured...
+    val = send(fd[0], buf, len, 0);
+    if (val <= 0){
+      perror(buf);
+      return 0;
+    }
+  }
+  return 1;
+}
+
 void KeysightScopeController::CloseConnection() {
   EUDAQ_CLOSE_SOCKET(sock_config);
 }
