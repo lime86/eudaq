@@ -30,8 +30,6 @@ using eudaq::to_string;
 #define MAXDATASIZE 300
 #define MAXHOSTNAME 80
 
-#define START 0x1254
-#define STOP 0x1255
 
 struct config_details_for_one_scope_type {
 	std::string IPaddr;
@@ -42,23 +40,13 @@ class KeysightScopeController {
 
 public:
 	KeysightScopeController();
-	SetConfigForScope(const config_details_for_one_scope_type conf);
+	void SetConfigForScope(const config_details_for_one_scope_type conf);
+	void SetAddress(std::string address);
+	void SetPort(std::string port);
+	std::string GetIdentification();
+        void OpenConnection();
+	void CloseConnection();
 	virtual ~KeysightScopeController();
-
-  void GetProducerHostInfo();
-  void Start();
-  void Stop();
-  void TagsSetting();
-  void DatatransportClientSocket_Open(const eudaq::Configuration &conf);
-  void DatatransportClientSocket_Close();
-  unsigned int DataTransportClientSocket_ReadLength(const char string[4]);
-  std::vector<unsigned char> DataTransportClientSocket_ReadData(int datalength);
-
-  void ConfigClientSocket_Open(const eudaq::Configuration &conf);
-  void ConfigClientSocket_Close();
-  void ConfigClientSocket_Send(unsigned char *text, size_t len);
-  unsigned int ConfigClientSocket_ReadLength(const char string[4]);
-  std::vector<unsigned char> ConfigClientSocket_ReadData(int datalength);
 
 private:
   struct hostent *hclient, *hconfig, *hdatatransport;
@@ -68,11 +56,9 @@ private:
 
   unsigned char conf_parameters[10];
 
-  struct timeval tv;
-  unsigned int sec;
-  unsigned int microsec;
-
   char ThisHost[80];
+  std::string m_ScopeAddress;
+  std::string m_config_socket_port;
 
   char Buffer_data[7000];
   char Buffer_length[7000];
@@ -83,13 +69,5 @@ private:
   int numbytes;
 
   // NiIPaddr;
-  unsigned TriggerType;
-  unsigned Det;
-  unsigned Mode;
-  unsigned NiVersion;
-  unsigned NumBoards;
-  unsigned FPGADownload;
-  unsigned MimosaID[6];
-  unsigned MimosaEn[6];
-  bool OneFrame;
+
 };
