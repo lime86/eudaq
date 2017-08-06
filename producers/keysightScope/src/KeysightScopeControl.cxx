@@ -40,6 +40,10 @@ int main(int /*argc*/, char **argv) {
   eudaq::Option<std::string> host_port(
       op, "p", "port", "5025", "port",
       "Port number");	
+  //eudaq::Option<bool> get_iden(
+  //    op, "i", "iden", "", false,
+  //    "Get identification");	
+
   try {
     op.Parse(argv);
 
@@ -52,8 +56,18 @@ int main(int /*argc*/, char **argv) {
     SCOPE.SetAddress(host_name.Value());
     SCOPE.SetPort(host_port.Value());
     SCOPE.OpenConnection();
+	  
+     //if(!get_iden.Value()) {
+	  std::cout << SCOPE.Write(std::string("*IDN?\n")) << std::endl;
+	  std::string return_value;
+	  SCOPE.Read(return_value);
+	  //char return_value[17000];
+	  //std::cout << SCOPE.Read(return_value) << std::endl;
+	  std::cout << return_value << std::endl;
+     //};
     //SCOPE.SetVersion(fwver.Value());
     //SCOPE.Configure();
+    SCOPE.CloseConnection();
 
     //std::cout << "Scope IDN = " << SCOPE.GetIdentifier() << std::endl;
 
