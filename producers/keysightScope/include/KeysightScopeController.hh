@@ -43,6 +43,10 @@ public:
 	void SetConfigForScope(const config_details_for_one_scope_type conf);
 	void SetAddress(std::string address);
 	void SetPort(std::string port);
+	int Write(char* buf);
+	int Write(std::string command);
+	int Read(char* buf);
+	int Read(std::string& answer);
 	std::string GetIdentification();
         void OpenConnection();
 	void CloseConnection();

@@ -119,14 +119,36 @@ void KeysightScopeController::OpenConnection()
 int KeysightScopeController::Write(char* buf){
   int val;
   int len = strlen(buf);
-  if ( != 0){ //if scope?configured...
-    val = send(fd[0], buf, len, 0);
+  if ( sock_config != 0){ //if scope?configured...
+    val = send(sock_config, buf, len, 0);
     if (val <= 0){
       perror(buf);
       return 0;
     }
   }
   return 1;
+}
+
+int KeysightScopeController::Write(std::string command) {
+    char buf[16384];
+    snprintf(buf, sizeof(buf), command.c_str());
+    return Write(buf);
+}
+
+int KeysightScopeController::Read(char* buf){
+    if (sock_config != 0){
+	std::cout << "buffer size: " << sizeof(buf) << std::endl;
+      return recv(sock_config, buf, 16000, 0);
+    } else return -1;
+}
+
+int KeysightScopeController::Read(std::string& answer){
+	int operation_successful;
+	char buf[16384];
+	
+	operation_successful = Read(buf);
+	answer.assign(buf,strlen(buf));
+	return operation_successful;
 }
 
 void KeysightScopeController::CloseConnection() {
