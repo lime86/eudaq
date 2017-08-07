@@ -79,7 +79,7 @@ int main(int /*argc*/, char **argv) {
      std::cout << "AUX: " << SCOPE.GetAuxStatus() << std::endl;
      if(get_active_channels.IsSet()) {
 	  for(int i=0;i<4;i++){
-		std::cout << SCOPE.IsChannelActive(i) << std::endl;
+		std::cout << "Channel " << i+1 << " active: " << SCOPE.IsChannelActive(i) << std::endl;
 	  }
      };     
     //SCOPE.SetVersion(fwver.Value());
