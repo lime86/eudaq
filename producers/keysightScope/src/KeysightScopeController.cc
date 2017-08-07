@@ -191,8 +191,8 @@ bool KeysightScopeController::IsChannelActive(int channel) {
     snprintf(buffer_command, sizeof(buffer_command), ":STAT? CHAN%d\n", channel+1);
     Write(buffer_command);
     if(Read(buffer_answer)<0) {std::cout << "error reading active channels" << std::endl;}
-    std::cout << buffer_answer << std::endl;
-    std::cout << atoi(buffer_answer) << std::endl;
+    //std::cout << buffer_answer << std::endl;
+    //std::cout << atoi(buffer_answer) << std::endl;
     return atoi(buffer_answer);
 	    /*
       if (nbytes <= 0)
