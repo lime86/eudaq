@@ -46,6 +46,9 @@ int main(int /*argc*/, char **argv) {
   eudaq::Option<float> set_aux_voltage(
       op, "a", "set_aux_voltage",-99, "set_aux_voltage",
       "Set aux voltage level");		
+  eudaq::OptionFlag get_active_channels(
+      op, "ac", "active-channels",
+      "Get active channels");		
 
   try {
     op.Parse(argv);
@@ -61,18 +64,18 @@ int main(int /*argc*/, char **argv) {
     SCOPE.OpenConnection();
 	  
      if(get_iden.IsSet()) {
-	  std::cout << SCOPE. << std::endl;
-	  std::string return_value;
-	  SCOPE.Read(return_value);
-	  //char return_value[17000];
-	  //std::cout << SCOPE.Read(return_value) << std::endl;
-	  std::cout << return_value << std::endl;
+	  std::cout << SCOPE.GetIdentification() << std::endl;
      };
      if(set_aux_voltage.Value()!=-99) {
 	     std::cout << "Setting AUX to " << set_aux_voltage.Value() << " V" << std::endl;
 	     SCOPE.SetAuxVoltage(set_aux_voltage.Value());
      };
-     //std::cout << "AUX: " << SCOPE.GetAuxStatus() << std::endl;
+     std::cout << "AUX: " << SCOPE.GetAuxStatus() << std::endl;
+     if(get_active_channels.IsSet()) {
+	  for(int i=0;i<4;i++){
+		std::cout << SCOPE.IsChannelActive(i) << std::endl;
+	  }
+     };     
     //SCOPE.SetVersion(fwver.Value());
     //SCOPE.Configure();
     SCOPE.CloseConnection();

@@ -23,12 +23,8 @@ typedef int SOCKET;
 
 using eudaq::to_string;
 
-// the port client will be connecting to
-#define PORT_CONFIG 49248
-#define PORT_DATATRANSF 49250
-// max number of bytes we can get at once
-#define MAXDATASIZE 300
-#define MAXHOSTNAME 80
+#define BUFFER_OUT_SIZE 16384
+#define BUFFER_IN_SIZE 16384
 
 
 struct config_details_for_one_scope_type {
@@ -40,43 +36,41 @@ class KeysightScopeController {
 
 public:
 	KeysightScopeController();
+
 	void SetConfigForScope(const config_details_for_one_scope_type conf);
+
 	void SetAddress(std::string address);
 	void SetPort(std::string port);
+
 	int Write(char* buf);
 	int Write(std::string command);
 	int Read(char* buf);
-	int Read(std::string& answer);
-	int Read(int& answer);
+	std::string Read();
+
 	std::string GetIdentification();
 	int SetAuxVoltage(float voltage);
 	std::string GetAuxStatus();
+
+	void SetStandardSettings();
+
+	bool IsChannelActive(int channel);
+
         void OpenConnection();
 	void CloseConnection();
+
 	virtual ~KeysightScopeController();
 
 private:
-  struct hostent *hclient, *hconfig, *hdatatransport;
-  struct sockaddr_in client;
   struct sockaddr_in config;
-  struct sockaddr_in datatransport;
 
   unsigned char conf_parameters[10];
 
-  char ThisHost[80];
   std::string m_ScopeAddress;
   std::string m_config_socket_port;
 
-  char Buffer_data[7000];
-  char Buffer_length[7000];
-  char buffer_command_string[16384];
-  char buffer_answer[16384];
+  char buffer_command[BUFFER_OUT_SIZE];
+  char buffer_answer[BUFFER_IN_SIZE];
 
-  uint32_t data_trans_addres; // = INADDR_NONE;
   SOCKET sock_config;
-  SOCKET sock_datatransport;
-  int numbytes;
-
-  // NiIPaddr;
 
 };

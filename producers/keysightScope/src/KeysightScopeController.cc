@@ -65,7 +65,7 @@ void KeysightScopeController::SetPort(std::string port) {
 std::string KeysightScopeController::GetIdentification() {
 	Write(std::string("*IDN?\n"));
 	
-	Read()
+	return Read();
 }
 
 void KeysightScopeController::OpenConnection()
@@ -133,33 +133,23 @@ int KeysightScopeController::Write(char* buf){
 }
 
 int KeysightScopeController::Write(std::string command) {
-    snprintf(buffer_command_string, sizeof(buffer_command_string), command.c_str());
-    return Write(buffer_command_string);
+    snprintf(buffer_command, BUFFER_OUT_SIZE, "%s" , command.c_str());
+    return Write(buffer_command);
 }
 
 int KeysightScopeController::Read(char* buf){
     if (sock_config != 0){
-      return recv(sock_config, buf, 16384, 0);
+      return recv(sock_config, buf, sizeof(buf), 0);
     } else return -1;
 }
 
-int KeysightScopeController::Read(std::string& answer){
+std::string KeysightScopeController::Read(){
 	int operation_successful;
-	char buf[16384];
+	std::string answer;
 	
-	operation_successful = Read(buf);
-	answer.assign(buf,strlen(buf));
-	return operation_successful;
-}
-
-int KeysightScopeController::Read(int& answer){
-	int operation_successful;
-	char buf[16384];
-	
-	operation_successful = Read(buf);
-	std::cout << buf << std::endl;
-	answer = atoi(buf);
-	return operation_successful;
+	operation_successful = Read(buffer_answer);
+	answer.assign(buffer_command,strlen(buffer_answer));
+	return answer;
 }
 
 int KeysightScopeController::SetAuxVoltage(float voltage){
@@ -167,18 +157,50 @@ int KeysightScopeController::SetAuxVoltage(float voltage){
 		std::cout << "Aux voltage outside of acceptable range" << std::endl;
 		return -1;
 	}
-	sprintf(buffer_command_string,":CAL:OUTP DC,%.2f\n",voltage);
+	sprintf(buffer_command,":CAL:OUTP DC,%.2f\n",voltage);
 	//std::cout << buffer_command_string << std::endl;
-	Write(buffer_command_string);
+	Write(buffer_command);
 	return 0;
 }
 
 std::string KeysightScopeController::GetAuxStatus() {
-	Write(":CAL:OUTP?\n");
-	std::string result;
-	Read(result);
-	return result;
+	Write(std::string(":CAL:OUTP?\n"));
+	return Read();
 }
+
+void KeysightScopeController::SetStandardSettings() {
+	  if(Write(std::string("STOP\n"))<0)
+		  std::cout << "Error issuing STOP" << std::endl;
+	  if(Write(std::string(":SYST:HEAD 0\n"))<0)
+		  std::cout << "Error issuing :SYST:HEAD 0" << std::endl;
+	  if(Write(std::string(":WAV:FORM BIN;BYT LSBF;STR 1;SEGM:ALL 1\n"))<0)
+		  std::cout << "Error issuing :WAV:FORM BIN;BYT LSBF;STR 1;SEGM:ALL 1" << std::endl;
+	/* Make sure we turn off sin(x)/x interpolation SSIM 01-NOV-2016 */
+	  if(Write(std::string(":ACQ:MODE SEGM;INT 0\n"))<0)
+		  std::cout << "Error issuing :ACQ:MODE SEGM;INT 0" << std::endl;		  
+
+  /* Slave scope specific setup */
+  //swrite(":TIM:REFC 1\n",  1);
+  //swrite(":TRIG:SWE TRIG\n",  1);
+  //swrite(":TRIG:MODE EDGE\n", 1);
+  //swrite(":TRIG:LEV AUX,0.5\n", 1);
+  //swrite(":TRIG:EDGE:COUP DC;SLOP POS;SOUR AUX\n", 1);
+}
+
+bool KeysightScopeController::IsChannelActive(int channel) {
+    snprintf(buffer_command, sizeof(buffer_command), ":STAT? CHAN%d\n", channel+1);
+    Write(buffer_command);
+    if(Read(buffer_answer)<0) {std::cout << "error reading active channels" << std::endl;}
+    std::cout << buffer_answer << std::endl;
+	    /*
+      if (nbytes <= 0)
+	goto the_end;
+      if (atol(buf)){
+	chmask |= (1 << i);
+      }
+    }
+	  */
+};
 
 void KeysightScopeController::CloseConnection() {
   EUDAQ_CLOSE_SOCKET(sock_config);
