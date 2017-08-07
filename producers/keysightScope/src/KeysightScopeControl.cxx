@@ -48,7 +48,10 @@ int main(int /*argc*/, char **argv) {
       "Set aux voltage level");		
   eudaq::OptionFlag get_active_channels(
       op, "ac", "active-channels",
-      "Get active channels");		
+      "Get active channels");
+  eudaq::OptionFlag set_standard_settings(
+      op, "ss", "set-standard_settings",
+      "Set standard settings");	
 
   try {
     op.Parse(argv);
@@ -63,6 +66,9 @@ int main(int /*argc*/, char **argv) {
     SCOPE.SetPort(host_port.Value());
     SCOPE.OpenConnection();
 	  
+     if(set_standard_settings.IsSet()) {
+	     SCOPE.SetStandardSettings();
+     }
      if(get_iden.IsSet()) {
 	  std::cout << SCOPE.GetIdentification() << std::endl;
      };
