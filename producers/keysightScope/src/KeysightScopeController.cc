@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <cstdlib>
 
 #include <errno.h>
 
@@ -62,7 +63,9 @@ void KeysightScopeController::SetPort(std::string port) {
 }
 
 std::string KeysightScopeController::GetIdentification() {
+	Write(std::string("*IDN?\n"));
 	
+	Read()
 }
 
 void KeysightScopeController::OpenConnection()
@@ -130,15 +133,13 @@ int KeysightScopeController::Write(char* buf){
 }
 
 int KeysightScopeController::Write(std::string command) {
-    char buf[16384];
-    snprintf(buf, sizeof(buf), command.c_str());
-    return Write(buf);
+    snprintf(buffer_command_string, sizeof(buffer_command_string), command.c_str());
+    return Write(buffer_command_string);
 }
 
 int KeysightScopeController::Read(char* buf){
     if (sock_config != 0){
-	std::cout << "buffer size: " << sizeof(buf) << std::endl;
-      return recv(sock_config, buf, 16000, 0);
+      return recv(sock_config, buf, 16384, 0);
     } else return -1;
 }
 
@@ -149,6 +150,34 @@ int KeysightScopeController::Read(std::string& answer){
 	operation_successful = Read(buf);
 	answer.assign(buf,strlen(buf));
 	return operation_successful;
+}
+
+int KeysightScopeController::Read(int& answer){
+	int operation_successful;
+	char buf[16384];
+	
+	operation_successful = Read(buf);
+	std::cout << buf << std::endl;
+	answer = atoi(buf);
+	return operation_successful;
+}
+
+int KeysightScopeController::SetAuxVoltage(float voltage){
+	if((voltage<-2.4)||(voltage>2.4)) {
+		std::cout << "Aux voltage outside of acceptable range" << std::endl;
+		return -1;
+	}
+	sprintf(buffer_command_string,":CAL:OUTP DC,%.2f\n",voltage);
+	//std::cout << buffer_command_string << std::endl;
+	Write(buffer_command_string);
+	return 0;
+}
+
+std::string KeysightScopeController::GetAuxStatus() {
+	Write(":CAL:OUTP?\n");
+	std::string result;
+	Read(result);
+	return result;
 }
 
 void KeysightScopeController::CloseConnection() {

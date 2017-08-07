@@ -40,9 +40,12 @@ int main(int /*argc*/, char **argv) {
   eudaq::Option<std::string> host_port(
       op, "p", "port", "5025", "port",
       "Port number");	
-  //eudaq::Option<bool> get_iden(
-  //    op, "i", "iden", "", false,
-  //    "Get identification");	
+  eudaq::OptionFlag get_iden(
+      op, "i", "iden",
+      "Get identification");	
+  eudaq::Option<float> set_aux_voltage(
+      op, "a", "set_aux_voltage",-99, "set_aux_voltage",
+      "Set aux voltage level");		
 
   try {
     op.Parse(argv);
@@ -57,14 +60,19 @@ int main(int /*argc*/, char **argv) {
     SCOPE.SetPort(host_port.Value());
     SCOPE.OpenConnection();
 	  
-     //if(!get_iden.Value()) {
-	  std::cout << SCOPE.Write(std::string("*IDN?\n")) << std::endl;
+     if(get_iden.IsSet()) {
+	  std::cout << SCOPE. << std::endl;
 	  std::string return_value;
 	  SCOPE.Read(return_value);
 	  //char return_value[17000];
 	  //std::cout << SCOPE.Read(return_value) << std::endl;
 	  std::cout << return_value << std::endl;
-     //};
+     };
+     if(set_aux_voltage.Value()!=-99) {
+	     std::cout << "Setting AUX to " << set_aux_voltage.Value() << " V" << std::endl;
+	     SCOPE.SetAuxVoltage(set_aux_voltage.Value());
+     };
+     //std::cout << "AUX: " << SCOPE.GetAuxStatus() << std::endl;
     //SCOPE.SetVersion(fwver.Value());
     //SCOPE.Configure();
     SCOPE.CloseConnection();

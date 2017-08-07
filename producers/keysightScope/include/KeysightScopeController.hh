@@ -47,7 +47,10 @@ public:
 	int Write(std::string command);
 	int Read(char* buf);
 	int Read(std::string& answer);
+	int Read(int& answer);
 	std::string GetIdentification();
+	int SetAuxVoltage(float voltage);
+	std::string GetAuxStatus();
         void OpenConnection();
 	void CloseConnection();
 	virtual ~KeysightScopeController();
@@ -66,6 +69,8 @@ private:
 
   char Buffer_data[7000];
   char Buffer_length[7000];
+  char buffer_command_string[16384];
+  char buffer_answer[16384];
 
   uint32_t data_trans_addres; // = INADDR_NONE;
   SOCKET sock_config;
