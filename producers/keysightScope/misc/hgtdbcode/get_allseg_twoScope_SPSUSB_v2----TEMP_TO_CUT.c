@@ -34,26 +34,6 @@ static void init_connect();
 
 static char buf[16384];
 
-int swrite(char* buf, int scope_num){
-  int val;
-  int len = strlen(buf);
-  if (fd[0] != 0 && scope_num != 1){
-    val = send(fd[0], buf, len, 0);
-    if (val <= 0){
-      perror(buf);
-      return 0;
-    }
-  }
-  if (fd[1] != 0 && scope_num != 0){
-    val = send(fd[1], buf, len, 0);
-    if (val <= 0){
-      perror(buf);
-      return 0;
-    }
-  }
-  return 1;
-}
-
 
 /* ----------------------------------------------------------------------0
    Transfer binary data file from scope to disk
