@@ -29,8 +29,39 @@ using eudaq::to_string;
 
 struct config_details_for_one_scope_type {
 	std::string IPaddr;
-	unsigned int Port;
+	int Port;
+	bool channelEnabled[4];
  };
+ 
+ enum format_type {ASCii = 0, BYTE = 1, WORD = 2, LONG = 3, LONGLONG = 4};
+	 
+ struct preamble_data_type {
+	format_type format;
+	unsigned int type;
+	long int points;
+	unsigned int count;
+	long int X_increment;
+	double X_origin;
+	long int X_reference;
+	long int Y_increment;
+	double Y_origin;
+	long int Y_reference;
+	unsigned int coupling;
+	long int X_display_range;
+	double X_display_origin;
+	long int Y_display_range;
+	double Y_display_origin;
+	std::string date;
+	std::time time;
+	std::string frame_model_number;
+	unsigned int acquisition_mode;
+	int completion;
+	unsigned int X_units;
+	unsigned int Y_units;
+	float max_bandwidth_limit;
+	float min_bandwidth_limit;
+	float min_bandwidth_limit;
+ }
   
 class KeysightScopeController {
 
@@ -52,6 +83,13 @@ public:
 	std::string GetAuxStatus();
 
 	void SetStandardSettings();
+	
+	void StartRun();
+	void StopRun();
+	std::string GetStatus();
+	int GetCurrentSegmentIndex();
+	std::string GetWaveformPreamble(unsigned int channel);
+	preamble_data_type DecodeWaveformPreamble(std::string preamble_string);
 
 	bool IsChannelActive(int channel);
 
