@@ -52,7 +52,7 @@ struct config_details_for_one_scope_type {
 	long int Y_display_range;
 	double Y_display_origin;
 	std::string date;
-	std::time time;
+	std::string time;
 	std::string frame_model_number;
 	unsigned int acquisition_mode;
 	int completion;
@@ -60,8 +60,7 @@ struct config_details_for_one_scope_type {
 	unsigned int Y_units;
 	float max_bandwidth_limit;
 	float min_bandwidth_limit;
-	float min_bandwidth_limit;
- }
+ };
   
 class KeysightScopeController {
 
