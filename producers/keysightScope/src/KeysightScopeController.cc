@@ -204,6 +204,34 @@ bool KeysightScopeController::IsChannelActive(int channel) {
 	  */
 };
 
+void KeysightScopeController::StartRun(){
+	Write(std::string(":RUN\n"));
+};
+
+void KeysightScopeController::StopRun(){
+	Write(std::string(":STOP\n"));
+};
+
+std::string KeysightScopeController::GetStatus(){
+	Write(std::string(":AST?\n"));
+};
+
+int KeysightScopeController::GetCurrentSegmentIndex(){
+	Write(std::string(":WAV:SEGM:COUN?\n"));
+	Read(buffer_answer);
+	return atoi(buffer_answer);
+}
+
+std::string KeysightScopeController::GetWaveformPreamble(unsigned int channel){
+	snprintf(buffer_command, sizeof(buffer_command), ":WAV:SOUR CHAN%d;PRE?\n", channel + 1);
+	Write(buffer_command);
+	return Read();
+}
+
+preamble_data_type KeysightScopeController::DecodeWaveformPreamble(std::string preamble_string){
+	sscanf();
+}
+
 void KeysightScopeController::CloseConnection() {
   EUDAQ_CLOSE_SOCKET(sock_config);
 }
