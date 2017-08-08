@@ -6,7 +6,7 @@ add_executable(KeysightScopeProducer src/KeysightScopeProducer.cc src/KeysightSc
 target_link_libraries(KeysightScopeControl EUDAQ ${EUDAQ_THREADS_LIB})
 target_link_libraries(KeysightScopeProducer EUDAQ ${EUDAQ_THREADS_LIB})
 
-INSTALL(TARGETS KeysightScopeControl
+INSTALL(TARGETS KeysightScopeControl KeysightScopeProducer
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib)

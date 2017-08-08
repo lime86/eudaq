@@ -49,9 +49,15 @@ int main(int /*argc*/, char **argv) {
   eudaq::OptionFlag get_active_channels(
       op, "ac", "active-channels",
       "Get active channels");
+  eudaq::OptionFlag get_waveform_preamble(
+      op, "gwp", "get-waveform-preamble",
+      "Print waveform preamble for all channels");	
   eudaq::OptionFlag set_standard_settings(
       op, "ss", "set-standard_settings",
       "Set standard settings");	
+  eudaq::OptionFlag get_status(
+      op, "gs", "get-status",
+      "Get status");	      
 
   try {
     op.Parse(argv);
@@ -82,6 +88,14 @@ int main(int /*argc*/, char **argv) {
 		std::cout << "Channel " << i+1 << " active: " << SCOPE.IsChannelActive(i) << std::endl;
 	  }
      };     
+     if(get_waveform_preamble.IsSet()) {
+	  for(int i=0;i<4;i++){
+		std::cout << SCOPE.GetWaveformPreamble(i) << std::endl;
+	  }	     
+     }
+     if(get_status.IsSet()) {
+	  std::cout << SCOPE.GetStatus() << std::endl;
+     }     
     //SCOPE.SetVersion(fwver.Value());
     //SCOPE.Configure();
     SCOPE.CloseConnection();

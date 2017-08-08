@@ -64,7 +64,6 @@ void KeysightScopeController::SetPort(std::string port) {
 
 std::string KeysightScopeController::GetIdentification() {
 	Write(std::string("*IDN?\n"));
-	
 	return Read();
 }
 
@@ -134,12 +133,13 @@ int KeysightScopeController::Write(char* buf){
 
 int KeysightScopeController::Write(std::string command) {
     snprintf(buffer_command, BUFFER_OUT_SIZE, "%s" , command.c_str());
+    std::cout << "Output command: " << command  << std::endl;
     return Write(buffer_command);
 }
 
 int KeysightScopeController::Read(char* buf){
     if (sock_config != 0){
-      return recv(sock_config, buf, sizeof(buf), 0);
+      return recv(sock_config, buf, BUFFER_IN_SIZE, 0);
     } else return -1;
 }
 
@@ -148,7 +148,9 @@ std::string KeysightScopeController::Read(){
 	std::string answer;
 	
 	operation_successful = Read(buffer_answer);
-	answer.assign(buffer_command,strlen(buffer_answer));
+	answer.assign(buffer_answer,strlen(buffer_answer));
+	//std::cout << "Received answer: " << buffer_answer << std::endl;
+	std::cout << "Received answer: " << answer << std::endl;
 	return answer;
 }
 
@@ -214,10 +216,13 @@ void KeysightScopeController::StopRun(){
 
 std::string KeysightScopeController::GetStatus(){
 	Write(std::string(":AST?\n"));
+	sleep(1);
+	return Read();
 };
 
 int KeysightScopeController::GetCurrentSegmentIndex(){
 	Write(std::string(":WAV:SEGM:COUN?\n"));
+	sleep(1);
 	Read(buffer_answer);
 	return atoi(buffer_answer);
 }
@@ -229,7 +234,39 @@ std::string KeysightScopeController::GetWaveformPreamble(unsigned int channel){
 }
 
 preamble_data_type KeysightScopeController::DecodeWaveformPreamble(std::string preamble_string){
-	sscanf();
+	std::stringstream ss(preamble_string);
+	std::string token[24];
+	
+	int counter = 0;
+	while(ss >> token[counter]) {
+		counter++;
+		if (ss.peek()==',')
+			ss.ignore();
+	}
+	/*
+	unsigned int type;
+	long int points;
+	unsigned int count;
+	long int X_increment;
+	double X_origin;
+	long int X_reference;
+	long int Y_increment;
+	double Y_origin;
+	long int Y_reference;
+	unsigned int coupling;
+	long int X_display_range;
+	double X_display_origin;
+	long int Y_display_range;
+	double Y_display_origin;
+	std::string date;
+	std::string time;
+	std::string frame_model_number;
+	unsigned int acquisition_mode;
+	int completion;
+	unsigned int X_units;
+	unsigned int Y_units;
+	float max_bandwidth_limit;
+	float min_bandwidth_limit;);*/
 }
 
 void KeysightScopeController::CloseConnection() {

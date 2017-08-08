@@ -22,25 +22,30 @@ public:
     std::cout << "Keysight Scope Producer was started successful " << std::endl;
   }
   void MainLoop() {
+    EUDAQ_DEBUG("Entering main loop of scope producer");
     do {
       if (!running) {
         eudaq::mSleep(50);
         continue;
       }
       if (running) {
-	      bool start_readout = false;
-	      /* Wait for ADONE other states are ARM | TRIG | ATRIG  or for recorded number of segments to go above 
-	      threshold in order to leave a bit of time for incoming trigger - safer as we do no have a service request! */
-	      if (scope_control[0]->GetStatus().at(1) == 'D'){
+		bool start_readout = false;
+		/* Wait for ADONE other states are ARM | TRIG | ATRIG  or for recorded number of segments to go above 
+		threshold in order to leave a bit of time for incoming trigger - safer as we do no have a service request! */
+	        //EUDAQ_DEBUG("Running");
+		if (scope_control[0]->GetStatus().at(1) == 'D'){
 		      start_readout = true;
 		      std::cout << "We reached ADONE - decrease threshold!" << std::endl;
+		      EUDAQ_DEBUG("We reached ADONE - decrease threshold!");
 		}
-	      sleep(1);
-		if(scope_control[0]->GetCurrentSegmentIndex()>=2000) {
+		eudaq::mSleep(50);
+		if(scope_control[0]->GetCurrentSegmentIndex()>=7000) {
 			start_readout = true;
+			EUDAQ_DEBUG("We reached 20000 segments");
 		}
 		
 		if(start_readout) {
+			EUDAQ_DEBUG("Scope producer entering readout");
 			if(scope_control[0]->GetCurrentSegmentIndex()<=0) continue;
 			std::cout << "Received " << scope_control[0]->GetCurrentSegmentIndex() << " segments" << std::endl;
 			
@@ -53,34 +58,12 @@ public:
 			int nsegm1 = 0;
 			for(unsigned int current_scope_id = 0; current_scope_id < NumberOfScopes; current_scope_id++){
 				/* --- Read waveform data for all selected channels */
-				for(current_channel=0; current_channel<4; i++){
+				for(unsigned int current_channel=0; current_channel<4; current_channel++){
 					if(config_details_for_all_scopes[current_scope_id].channelEnabled[current_channel]==false) continue;
-
-					/* Waveform PREamble first and put in the TEXT file */
-					snprintf(buf, sizeof(buf), ":WAV:SOUR CHAN%d;PRE?\n", (i & 3) + 1);
 					
-					nel = swrite(buf, scope_num);
-					if (nel <= 0)
-						goto the_end;
-						nbytes = recv(fd[scope_num], buf, sizeof(buf), 0);
-					if (nbytes <= 0)
-						goto the_end;
-					write(id_txt, buf, nbytes);
-					sscanf(buf, "%d,%d,%d", &pre_fmt, &pre_type, &pre_npts);
-
-					/* Waveform data goes to binary file */
-					nel = swrite(":WAV:DATA?\n", scope_num);
-					if (nel <= 0)g
-					    goto the_end;
-					/* Waveform data will be in 16-bit INTEGER format */
-					nbytes = (scope_num ? nsegm1 : nsegm) * pre_npts * sizeof(short) + 3;
-					ier = scope_data2disk(id_dat, nbytes, scope_num);
-					if (ier){
-						fprintf(stderr, "Data check error at %d\n", __LINE__);
-						goto the_end;
-					}
 				}
 			}
+			scope_control[0]->SetAuxVoltage(0);
 		}
 	}
 		
@@ -158,43 +141,31 @@ public:
   }
   virtual void OnStartRun(unsigned param) {
     try {
+	    m_run = param;
+	    EUDAQ_DEBUG("Starting Keysight scope run");
 	    eudaq::RawDataEvent ev(RawDataEvent::BORE("KeyScope", m_run));
 	    ev.SetTag("NumberOfScopes", NumberOfScopes);
-
+	    EUDAQ_DEBUG("BORE created for Keysight scope");
+	    
 		for(unsigned int current_scope_id = 0; current_scope_id < NumberOfScopes; current_scope_id++) {
-			for(current_channel=0; current_channel<4; i++){
+			EUDAQ_DEBUG("Dealing with scope " + std::to_string(current_scope_id));
+			for(unsigned int current_channel=0; current_channel<4; current_channel++){\
+				EUDAQ_DEBUG("Dealing with channel " + std::to_string(current_channel));
 				if(config_details_for_all_scopes[current_scope_id].channelEnabled[current_channel]==false) continue;
 
 				/* Waveform PREamble first and put in the BORE */
-				ev.SetTag("Preamble_Scope_" + current_scope_id + "_Channel_" + current_channel, scope_control[current_scope_id]->GetWaveformPreamble());
-			snprintf(buf, sizeof(buf), ":WAV:SOUR CHAN%d;PRE?\n", (i & 3) + 1);
-					
-					nel = swrite(buf, scope_num);
-					if (nel <= 0)
-						goto the_end;
-						nbytes = recv(fd[scope_num], buf, sizeof(buf), 0);
-					if (nbytes <= 0)
-						goto the_end;
-					write(id_txt, buf, nbytes);
-					sscanf(buf, "%d,%d,%d", &pre_fmt, &pre_type, &pre_npts);
-
-					/* Waveform data goes to binary file */
-					nel = swrite(":WAV:DATA?\n", scope_num);
-					if (nel <= 0)g
-					    goto the_end;
-					/* Waveform data will be in 16-bit INTEGER format */
-					nbytes = (scope_num ? nsegm1 : nsegm) * pre_npts * sizeof(short) + 3;
-					ier = scope_data2disk(id_dat, nbytes, scope_num);
-					if (ier){
-						fprintf(stderr, "Data check error at %d\n", __LINE__);
-						goto the_end;
-					}
-				}			
+				EUDAQ_DEBUG("Getting preamble and writing into BORE as tag");
+				ev.SetTag("Preamble_Scope_" + std::to_string(current_scope_id) + "_Channel_" + std::to_string(current_channel), scope_control[current_scope_id]->GetWaveformPreamble(current_channel));
+				}	
+			EUDAQ_DEBUG("Arming scope " + std::to_string(current_scope_id));				
 			scope_control[current_scope_id]->StartRun();
 		}		
 		running = true;
+		EUDAQ_DEBUG("Removing veto scope 0");	
+		SendEvent(ev);
 		scope_control[0]->SetAuxVoltage(0);
-      SetConnectionState(eudaq::ConnectionState::STATE_RUNNING, "Started");
+		SetConnectionState(eudaq::ConnectionState::STATE_RUNNING, "Started");
+		EUDAQ_DEBUG("Scope producer connection state running");	
     } catch (const std::exception &e) {
       printf("Caught exception: %s\n", e.what());
       SetConnectionState(eudaq::ConnectionState::STATE_ERROR, "Start Error");
@@ -202,6 +173,7 @@ public:
       printf("Unknown exception\n");
       SetConnectionState(eudaq::ConnectionState::STATE_ERROR, "Start Error");
     }
+    EUDAQ_DEBUG("Scope producer leaving on start run");	
   }
   virtual void OnStopRun() {
     try {
