@@ -13,3 +13,8 @@ InitParamter = 123
 [Producer.TLU]
 ErrorHandler=2
 
+[Producer.USBpix]
+config_file=C:\USBpixI4\bin\test.cfg.root
+SRAM_READOUT=10
+lvl1_delay=26
+

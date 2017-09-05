@@ -222,8 +222,10 @@ std::string KeysightScopeController::GetStatus(){
 
 int KeysightScopeController::GetCurrentSegmentIndex(){
 	Write(std::string(":WAV:SEGM:COUN?\n"));
-	sleep(1);
+	//sleep(1);
 	Read(buffer_answer);
+	std::cout << "GetCurrentSegmentIndex_string " << buffer_answer << std::endl;
+	std::cout << "GetCurrentSegmentIndex_number " << atoi(buffer_answer) << std::endl;
 	return atoi(buffer_answer);
 }
 
@@ -267,6 +269,13 @@ preamble_data_type KeysightScopeController::DecodeWaveformPreamble(std::string p
 	unsigned int Y_units;
 	float max_bandwidth_limit;
 	float min_bandwidth_limit;);*/
+}
+
+void KeysightScopeController::GetData(int channel){
+	Write(std::string(":AST?\n"));
+	sleep(1);
+	Write(std::string(":WAV:DATA?\n"));
+	return Read();	
 }
 
 void KeysightScopeController::CloseConnection() {
