@@ -39,10 +39,10 @@ public:
 		      EUDAQ_DEBUG("We reached ADONE - decrease threshold!");
 		}
 		eudaq::mSleep(50);
-		if(scope_control[0]->GetCurrentSegmentIndex()>=7000) {
-			start_readout = true;
-			EUDAQ_DEBUG("We reached 20000 segments");
-		}
+		//if(scope_control[0]->GetCurrentSegmentIndex()>=1000) {
+		//	start_readout = true;
+		//	EUDAQ_DEBUG("We reached 20000 segments");
+		//}
 		
 		if(start_readout) {
 			EUDAQ_DEBUG("Scope producer entering readout");
@@ -63,6 +63,10 @@ public:
 					
 				}
 			}
+			eudaq::RawDataEvent ev("KeysightScope", m_run, m_ev++);
+			//ev.AddBlock(0, mimosa_data_0);
+			//ev.AddBlock(1, mimosa_data_1);
+			SendEvent(ev);
 			scope_control[0]->SetAuxVoltage(0);
 		}
 	}

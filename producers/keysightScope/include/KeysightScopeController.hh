@@ -89,6 +89,8 @@ public:
 	int GetCurrentSegmentIndex();
 	std::string GetWaveformPreamble(unsigned int channel);
 	preamble_data_type DecodeWaveformPreamble(std::string preamble_string);
+	
+	void ReadData();
 
 	bool IsChannelActive(int channel);
 

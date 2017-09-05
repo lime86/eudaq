@@ -58,6 +58,9 @@ int main(int /*argc*/, char **argv) {
   eudaq::OptionFlag get_status(
       op, "gs", "get-status",
       "Get status");	      
+  eudaq::OptionFlag get_last_segment(
+      op, "lcs", "last-captured-segment",
+      "Get index of last segment");      
 
   try {
     op.Parse(argv);
@@ -96,6 +99,9 @@ int main(int /*argc*/, char **argv) {
      if(get_status.IsSet()) {
 	  std::cout << SCOPE.GetStatus() << std::endl;
      }     
+     if(get_last_segment.IsSet()) {
+	     std::cout << SCOPE.GetCurrentSegmentIndex() << std::endl;
+     }
     //SCOPE.SetVersion(fwver.Value());
     //SCOPE.Configure();
     SCOPE.CloseConnection();
