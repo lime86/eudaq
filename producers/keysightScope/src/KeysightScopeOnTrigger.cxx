@@ -46,6 +46,9 @@ int main(int /*argc*/, char **argv) {
   eudaq::OptionFlag do_simple_handshake(
       op, "hs", "handshake",
       "Do simple handshake");      
+  eudaq::OptionFlag check_and_set_veto(
+      op, "cs", "checkveto",
+      "Check and set veto"); 	
 
   try {
     op.Parse(argv);
@@ -60,9 +63,10 @@ int main(int /*argc*/, char **argv) {
 	     SCOPE.SetAuxVoltage(set_aux_voltage.Value());
      };
      
-     if(do_simple_handshake.IsSet()) {
-	     SCOPE.SetAuxVoltage(1.5);
-	     SCOPE.SetAuxVoltage(0);
+     if(check_and_set_veto.IsSet()) {
+	     std::string status;
+	     status=SCOPE.GetStatus();
+	     if(status[1]=='D') SCOPE.SetAuxVoltage(-1.0);
      }
     SCOPE.CloseConnection();
 

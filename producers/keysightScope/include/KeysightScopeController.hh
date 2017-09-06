@@ -90,7 +90,7 @@ public:
 	std::string GetWaveformPreamble(unsigned int channel);
 	preamble_data_type DecodeWaveformPreamble(std::string preamble_string);
 	
-	void ReadData();
+	//void ReadData();
 
 	bool IsChannelActive(int channel);
 
