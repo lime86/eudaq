@@ -271,12 +271,12 @@ preamble_data_type KeysightScopeController::DecodeWaveformPreamble(std::string p
 	float min_bandwidth_limit;);*/
 }
 
-void KeysightScopeController::GetData(int channel){
-	Write(std::string(":AST?\n"));
-	sleep(1);
+/*int KeysightScopeController::GetData(int channel){
+	Write(std::string(":AST?"+channel+"\n"));
 	Write(std::string(":WAV:DATA?\n"));
-	return Read();	
-}
+	Read(buffer_answer);
+	//return buffer_answer;
+}*/
 
 void KeysightScopeController::CloseConnection() {
   EUDAQ_CLOSE_SOCKET(sock_config);
