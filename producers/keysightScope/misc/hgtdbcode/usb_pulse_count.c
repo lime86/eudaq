@@ -16,7 +16,7 @@ static unsigned char mcp_buf[256];
 int mcp_init(){
   int ier;
 
-  m_fd = open("/dev/hidraw2", O_RDWR);
+  m_fd = open("/dev/hidraw3", O_RDWR);
   if (m_fd < 0){
     perror("mcp_init: Cannot open USB device special file");
     return 1;

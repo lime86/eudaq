@@ -23,7 +23,7 @@
 #define RAW_DATA_ENABLED
 #define WITH_TTAG
 
-#define HOST  "192.168.4.70"
+#define HOST  "192.168.4.246"
 //#define HOST2 "192.168.4.71"
 #define PORT 5025
 

@@ -177,9 +177,14 @@ void KeysightScopeController::SetStandardSettings() {
 		  std::cout << "Error issuing :SYST:HEAD 0" << std::endl;
 	  if(Write(std::string(":WAV:FORM BIN;BYT LSBF;STR 1;SEGM:ALL 1\n"))<0)
 		  std::cout << "Error issuing :WAV:FORM BIN;BYT LSBF;STR 1;SEGM:ALL 1" << std::endl;
-	/* Make sure we turn off sin(x)/x interpolation SSIM 01-NOV-2016 */
+	/* Make sure we turn off sin(x)/x interpolation SSIM 01-NOV-2016 */\
+  if(handshake_mode==0){
+	  if(Write(std::string(":ACQ:MODE RTIMe;INT 0\n"))<0)
+		  std::cout << "Error issuing :ACQ:MODE RTIMe;INT 0" << std::endl;		  
+  } else {	  
 	  if(Write(std::string(":ACQ:MODE SEGM;INT 0\n"))<0)
 		  std::cout << "Error issuing :ACQ:MODE SEGM;INT 0" << std::endl;		  
+  }	  
 
   /* Slave scope specific setup */
   //swrite(":TIM:REFC 1\n",  1);
@@ -210,13 +215,17 @@ void KeysightScopeController::StartRun(){
 	Write(std::string(":RUN\n"));
 };
 
+void KeysightScopeController::StartSingleRun(){
+	Write(std::string(":SINGle\n"));
+};
+
 void KeysightScopeController::StopRun(){
 	Write(std::string(":STOP\n"));
 };
 
 std::string KeysightScopeController::GetStatus(){
 	Write(std::string(":AST?\n"));
-	sleep(1);
+	//sleep(1);
 	return Read();
 };
 
@@ -277,6 +286,13 @@ preamble_data_type KeysightScopeController::DecodeWaveformPreamble(std::string p
 	Read(buffer_answer);
 	//return buffer_answer;
 }*/
+
+void KeysightScopeController::ReadData(std::vector<char>* data_package) {
+    int data_package_length;
+    data_package_length = Read(buffer_answer);
+    if(data_package_length<0) {std::cout << "error getting data" << std::endl;}
+    data_package->assign(*buffer_answer,data_package_length);
+}
 
 void KeysightScopeController::CloseConnection() {
   EUDAQ_CLOSE_SOCKET(sock_config);

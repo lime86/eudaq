@@ -11,6 +11,8 @@
 
 using eudaq::RawDataEvent;
 
+unsigned int handshake_mode = 0;
+
 class KeysightScopeProducer : public eudaq::Producer {
 public:
   KeysightScopeProducer(const std::string &runcontrol)
@@ -24,11 +26,61 @@ public:
   void MainLoop() {
     EUDAQ_DEBUG("Entering main loop of scope producer");
     do {
+      //EUDAQ_DEBUG("Doing main loop");
       if (!running) {
         eudaq::mSleep(50);
         continue;
       }
       if (running) {
+	        if(handshake_mode==0) {
+		bool start_readout = false;
+		/* Wait for ADONE other states are ARM | TRIG | ATRIG  or for recorded number of segments to go above 
+		threshold in order to leave a bit of time for incoming trigger - safer as we do no have a service request! */
+	        //EUDAQ_DEBUG("Running");
+		if (scope_control[0]->GetStatus().at(1) == 'D'){
+		      start_readout = true;
+		      std::cout << "We reached ADONE" << std::endl;
+		      EUDAQ_DEBUG("We reached ADONE");
+		}
+		//eudaq::mSleep(50);
+		//if(scope_control[0]->GetCurrentSegmentIndex()>=1000) {
+		//	start_readout = true;
+		//	EUDAQ_DEBUG("We reached 20000 segments");
+		//}
+		if(start_readout) {
+			EUDAQ_DEBUG("Scope producer entering readout");
+			
+			// prepare for stop of triggers
+			scope_control[0]->SetAuxVoltage(2);
+			//eudaq::mSleep(1); //adjust this value by trial and error
+			//scope_control[0]->StopRun();
+			//scope_control[1]->StopRun();
+			EUDAQ_DEBUG("Stopped run for scope 0");
+			//Number of events in slave scope is UNKNOWN yet 
+			eudaq::RawDataEvent ev("KeysightScope", m_run, m_ev++);
+			EUDAQ_DEBUG("Created raw event");
+			unsigned int block_number;
+			for(unsigned int current_scope_id = 0; current_scope_id < NumberOfScopes; current_scope_id++){
+				/* --- Read waveform data for all selected channels */
+				for(unsigned int current_channel=0; current_channel<4; current_channel++){
+					if(config_details_for_all_scopes[current_scope_id].channelEnabled[current_channel]==false) continue;
+					EUDAQ_DEBUG("Reading channel");
+					std::vector<char> buffer;
+					scope_control[0]->ReadData(&buffer);
+					EUDAQ_DEBUG("Read data");
+					ev.AddBlock(block_number, buffer);
+					EUDAQ_DEBUG("Added block");
+					block_number++;
+				}
+			}
+			EUDAQ_DEBUG("Sent data");
+			//ev.AddBlock(0, mimosa_data_0);
+			//ev.AddBlock(1, mimosa_data_1);
+			scope_control[0]->StartSingleRun();
+			scope_control[0]->SetAuxVoltage(0);
+			SendEvent(ev);
+		}
+		} else {
 		bool start_readout = false;
 		/* Wait for ADONE other states are ARM | TRIG | ATRIG  or for recorded number of segments to go above 
 		threshold in order to leave a bit of time for incoming trigger - safer as we do no have a service request! */
@@ -67,7 +119,8 @@ public:
 			//ev.AddBlock(0, mimosa_data_0);
 			//ev.AddBlock(1, mimosa_data_1);
 			SendEvent(ev);
-			scope_control[0]->SetAuxVoltage(0);
+			scope_control[0]->SetAuxVoltage(0);			
+			}
 		}
 	}
 		
@@ -162,7 +215,7 @@ public:
 				ev.SetTag("Preamble_Scope_" + std::to_string(current_scope_id) + "_Channel_" + std::to_string(current_channel), scope_control[current_scope_id]->GetWaveformPreamble(current_channel));
 				}	
 			EUDAQ_DEBUG("Arming scope " + std::to_string(current_scope_id));				
-			scope_control[current_scope_id]->StartRun();
+			scope_control[current_scope_id]->StartSingleRun();
 		}		
 		running = true;
 		EUDAQ_DEBUG("Removing veto scope 0");	
@@ -195,6 +248,8 @@ public:
       printf("Unknown exception\n");
       SetConnectionState(eudaq::ConnectionState::STATE_ERROR, "Stop Error");
     }
+    eudaq::RawDataEvent ev(RawDataEvent::EORE("KeyScope", m_run, 1000));
+    SendEvent(ev);
   }
   virtual void OnTerminate() {
     std::cout << "Terminate (press enter)" << std::endl;

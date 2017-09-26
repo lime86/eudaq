@@ -65,6 +65,7 @@ struct config_details_for_one_scope_type {
 class KeysightScopeController {
 
 public:
+	unsigned int handshake_mode = 0;	
 	KeysightScopeController();
 
 	void SetConfigForScope(const config_details_for_one_scope_type conf);
@@ -84,13 +85,14 @@ public:
 	void SetStandardSettings();
 	
 	void StartRun();
+	void StartSingleRun();
 	void StopRun();
 	std::string GetStatus();
 	int GetCurrentSegmentIndex();
 	std::string GetWaveformPreamble(unsigned int channel);
 	preamble_data_type DecodeWaveformPreamble(std::string preamble_string);
 	
-	//void ReadData();
+	void ReadData(std::vector<char>*);
 
 	bool IsChannelActive(int channel);
 
