@@ -39,8 +39,8 @@ public:
 	        //EUDAQ_DEBUG("Running");
 		if (scope_control[0]->GetStatus().at(1) == 'D'){
 		      start_readout = true;
-		      std::cout << "We reached ADONE" << std::endl;
-		      EUDAQ_DEBUG("We reached ADONE");
+		      //std::cout << "We reached ADONE" << std::endl;
+		      //EUDAQ_DEBUG("We reached ADONE");
 		}
 		//eudaq::mSleep(50);
 		//if(scope_control[0]->GetCurrentSegmentIndex()>=1000) {
