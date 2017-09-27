@@ -216,7 +216,8 @@ void KeysightScopeController::StartRun(){
 };
 
 void KeysightScopeController::StartSingleRun(){
-	Write(std::string(":SINGle\n"));
+	//Write(std::string(":SINGle\n"));
+	Write(std::string(":DIG\n"));
 };
 
 void KeysightScopeController::StopRun(){
