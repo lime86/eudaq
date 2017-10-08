@@ -18,10 +18,15 @@ include_directories(${EUDAQ_INCLUDE_DIRS})
 option(USER_EUDET_BUILD_NI "build user/eudet ni" ON)
 set(USER_BUILD_NI ${USER_EUDET_BUILD_NI})
 
-find_package(CACTUS)
-cmake_dependent_option(USER_EUDET_BUILD_FMCTLU "build user/eudet FMC TLU" ON
-  "CACTUS_FOUND" OFF)
-set(USER_BUILD_FMCTLU ${USER_EUDET_BUILD_FMCTLU})
+#find_package(Boost 1.53 REQUIRED COMPONENTS
+#             thread system)
+find_package(cactus_uhal_log REQUIRED)
+find_package(cactus_uhal_grammars REQUIRED)
+find_package(cactus_uhal_uhal REQUIRED)
+#cmake_dependent_option(USER_EUDET_BUILD_FMCTLU "build user/eudet FMC TLU" ON
+#  "CACTUS_FOUND" OFF)
+# set(USER_BUILD_FMCTLU ${USER_EUDET_BUILD_FMCTLU})
+set(USER_BUILD_FMCTLU ON)
 
 find_package(ZestSC1)
 find_package(LIBUSB)

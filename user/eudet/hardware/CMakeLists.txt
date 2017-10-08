@@ -18,7 +18,7 @@ if(USER_BUILD_FMCTLU)
   list(APPEND USER_HARDWARE_SRC src/FmctluController.cc)
   list(APPEND USER_HARDWARE_SRC src/FmctluHardware.cc)
   list(APPEND USER_HARDWARE_SRC src/FmctluI2c.cc)
-  list(APPEND USER_HARDWARE_DEP_LIB ${CACTUS_LIBRARIES})
+  list(APPEND USER_HARDWARE_DEP_LIB cactus_uhal_log cactus_uhal_grammars cactus_uhal_uhal)
 endif()
 
 if(USER_BUILD_NI)
