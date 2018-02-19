@@ -10,6 +10,7 @@
 #include <iostream>
 #include <ostream>
 #include <vector>
+#include <string>
 //#include <sched.h>
 
 //PIController::PIController(const std::string &name,
@@ -34,12 +35,11 @@ public:
 			m_hostname = &m_hostname2[0];
 			m_portnumber = init.Get("PortNumber", 50001);
 			std::cout << m_hostname2 << m_portnumber << m_hostname << std::endl;
-			if (!wrapper) {
-				wrapper = std::make_shared<PIWrapper>(m_portnumber, m_hostname);
-				// connect
-				if (!wrapper->connectTCPIP()) {
-					EUDAQ_ERROR("No TCP/IP connection to PI Controller!");
-				}
+			wrapper = std::make_shared<PIWrapper>(m_portnumber, m_hostname);
+
+			// connect
+			if (!wrapper->connectTCPIP()) {
+				EUDAQ_ERROR("No TCP/IP connection to PI Controller!");
 			}
 			// check
 			if (!wrapper->isConnected()) {
@@ -118,6 +118,10 @@ public:
 			m_position3 = config.Get("Position3", -1.0);
 			m_position4 = config.Get("Position4", -1.0);
 
+			m_nsteps4 = config.Get("Nsteps4", 0);
+			m_stepsize4 = config.Get("Stepsize4", 0.);
+
+
 			// Set velocity
 			printf("\nSet individual velocity:\n");
 			if (m_velocity1 >= m_velocitymax) { m_velocity1 = m_velocitymax; }
@@ -154,12 +158,33 @@ public:
 			if (m_position4 < 0) { printf("No movement of axis4!\n"); }
 			else { wrapper->moveTo(m_axis4, m_position4); }
 
+			if (m_nsteps4 > 0){
+				if (m_stepsize4 == 0.){
+					EUDAQ_ERROR("Amount of steps (NstepsX) given, but (StepsizeX) is 0. This cannot end well!");
+				}
+				else{
+					EUDAQ_INFO("Performing " + std::to_string(m_nsteps4) + " steps of " + std::to_string(m_stepsize4) + " units each. Starting at " + std::to_string(m_position4));
+					m_currstep = 0;
+				}
+			}
+
 			// New position	
 			printf("\nCurrent position:\n");
 			wrapper->printPosition(m_axis1);
 			wrapper->printPosition(m_axis2);
 			wrapper->printPosition(m_axis3);
 			wrapper->printPosition(m_axis4);
+
+			double pos_curr1;
+			double pos_curr2;
+			double pos_curr3;
+			double pos_curr4;
+			wrapper->getPosition2(m_axis1, &pos_curr1);
+			wrapper->getPosition2(m_axis2, &pos_curr2);
+			wrapper->getPosition2(m_axis3, &pos_curr3);
+			wrapper->getPosition2(m_axis4, &pos_curr4);
+
+			EUDAQ_INFO("Moved to x=" + std::to_string(pos_curr1) + " , y=" + std::to_string(pos_curr2) + " , phi=" + std::to_string(pos_curr4));
 
 			SetConnectionState(eudaq::ConnectionState::STATE_CONF, "Configured (" + config.Name() + ")");
 		}
@@ -172,7 +197,36 @@ public:
 	virtual void PIController::OnStartRun(unsigned runnumber) {
 
 		try {
-			// No Action
+			// If a stepping is wanted, execute the next step.
+
+			if (m_currstep < m_nsteps4 && m_stepsize4!=0){
+
+				if (m_currstep == 0){
+					EUDAQ_INFO("Initial step, staying at first position.");
+				}else{
+					m_position4 += m_stepsize4;
+					if (m_position4 >= m_axis4max) {
+						EUDAQ_ERROR("Position target value too large: " + std::to_string(m_position4) + "   Moving to maximum value: " + std::to_string(m_axis4max));
+						m_position4 = m_axis4max;
+						m_currstep = m_nsteps4;
+					}
+					if (m_position4 < 0) {
+						EUDAQ_ERROR("Position target value too small: " + std::to_string(m_position4) + "   Moving to minimum value: " + std::to_string(m_axis4max));
+						m_position4 = 0.0;
+						m_currstep = m_nsteps4;
+					}
+					wrapper->moveTo(m_axis4, m_position4);
+
+					double pos_curr4;
+					wrapper->getPosition2(m_axis4, &pos_curr4);
+
+					EUDAQ_INFO("Step Nr. " + std::to_string(m_currstep) + " , phi=" + std::to_string(pos_curr4) + " deg");
+				}
+
+				m_currstep++;
+
+			}
+
 
 			// get position
 			printf("\nCurrent position:\n");
@@ -257,6 +311,9 @@ private:
 	double m_velocity3 = 0.0;
 	double m_velocity4 = 0.0;
 	double m_velocitymax = 10.0;
+	double m_stepsize4 = 0.0;
+	unsigned int m_nsteps4 = 0;
+	unsigned int m_currstep = 0;
 };
 
 // The main function that will create a Producer instance and run it
