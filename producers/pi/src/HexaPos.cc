@@ -33,10 +33,8 @@ int HexaPos::BuildGrid() {
 
     while(posY > - (m_smallR + m_borderOffsetY)){
 
-	if (posY < m_smallR &&
-	    posY > -m_smallR &&
-	    posX > -m_largeD &&
-	    posX < m_largeD){
+	if ((posY >= 0. && ( posY < m_a * posX + m_b )) ||
+	    (posY < 0. && ( posY > -(m_a * posX + m_b)))) {
 
 	    m_npoints += 1;
 
@@ -74,13 +72,3 @@ int HexaPos::BuildGrid() {
 
     return 0;
 }
-
-/*
-int getPosX(int positionID){
-
-    if(positionID < m_npoints)
-	return m_positionsX[positionID];
-    else
-	return -1;
-}
-*/
