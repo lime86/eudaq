@@ -67,12 +67,14 @@ public:
     int BuildGrid();
 
     // functions to set parameters
+    void setCenterX(double posX) { m_centerX = posX; } ;
+    void setCenterY(double posY) { m_centerY = posY; } ;
     void setStepX(int step) { m_stepSizeX = step; };
     void setStepY(int step) { m_stepSizeY = step; };
 
     // functions to get parameters
-    int getPosX(int positionID) { return (positionID < m_npoints)? m_positionsX.at(positionID):-1; };
-    int getPosY(int positionID) { return (positionID < m_npoints)? m_positionsY.at(positionID):-1; };
+    int getPosX(int posID) { return (posID < m_npoints)? m_positionsX.at(posID):-1; };
+    int getPosY(int posID) { return (posID < m_npoints)? m_positionsY.at(posID):-1; };
     int getNpos() {return m_npoints;};
 };
 
