@@ -11,6 +11,9 @@ int main(int argc, char* argv[]){
 
     HexaPos hexgrid(cX, cY);
 
+    hexgrid.setStepX(100);
+    hexgrid.setStepY(200);
+
     hexgrid.BuildGrid();
 
     std::cout << "Number of positions " << hexgrid.getNpos() << std::endl;

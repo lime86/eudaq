@@ -50,7 +50,10 @@ int HexaPos::BuildGrid() {
 	    // Reached end of row, moving to the start of the next one
 	    if ( posY > m_a * posX + m_b){
 		posY -= m_stepSizeY;
-		posX = - (posY - m_b) / m_a + m_borderOffsetX;
+		if ( posY > 0 )
+		    posX = - (posY - m_b) / m_a + m_borderOffsetX;
+		else
+		    posX = (posY + m_b) / m_a + m_borderOffsetX;
 	    }
 	    else {
 		posX += m_stepSizeX;
