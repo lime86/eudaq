@@ -5,7 +5,7 @@
 #include <vector>
 
 // Hexagonal position list
-class HexaPos {
+class HexGrid {
     /*
      _______
     /   |   \
@@ -59,10 +59,10 @@ protected:
 
 public:
 
-    HexaPos();
-    HexaPos(double centerX, double centerY);
+    HexGrid();
+    HexGrid(double centerX, double centerY);
 
-    ~HexaPos();
+    ~HexGrid();
 
     int BuildGrid();
 

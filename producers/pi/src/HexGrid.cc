@@ -1,20 +1,20 @@
-#include "HexaPos.h"
+#include "HexGrid.h"
 #include <iostream>
 
 /* Constructor and destructor */
 
-HexaPos::HexaPos() {}
+HexGrid::HexGrid() {}
 
-HexaPos::HexaPos(double centerX, double centerY) {
+HexGrid::HexGrid(double centerX, double centerY) {
 
     m_centerX = centerX;
     m_centerY = centerY;
 }
 
-HexaPos::~HexaPos() {}
+HexGrid::~HexGrid() {}
 
 /* Construct position grid */
-int HexaPos::BuildGrid() {
+int HexGrid::BuildGrid() {
 
     /*
      _______

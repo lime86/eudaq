@@ -1,15 +1,15 @@
-#include "HexaPos.h"
+#include "HexGrid.h"
 #include <iostream>
 
 int main(int argc, char* argv[]){
 
     //////////////////////////////////
-    std::cout << "Start HexaPos" << std::endl;
+    std::cout << "Start HexGrid" << std::endl;
     // create grid
     double cX = 0;//1000.;
     double cY = 0;//2000.;
 
-    HexaPos hexgrid(cX, cY);
+    HexGrid hexgrid(cX, cY);
 
     hexgrid.setStepX(100);
     hexgrid.setStepY(200);
