@@ -6,6 +6,7 @@
 #include "eudaq/Configuration.hh"
 
 #include "PIWrapper.h"
+#include "HexGrid.h"
 
 #include <iostream>
 #include <ostream>
@@ -68,7 +69,7 @@ public:
 			wrapper->setVelocityStage(m_axis2, m_velocitymax);
 			wrapper->setVelocityStage(m_axis3, m_velocitymax);
 			wrapper->setVelocityStage(m_axis4, m_velocitymax);
-			
+
 			std::cout << "\nGet velocity:" << std::endl;
 			wrapper->printVelocityStage(m_axis1);
 			wrapper->printVelocityStage(m_axis2);
@@ -113,13 +114,52 @@ public:
 			m_velocity2 = config.Get("Velocity2", -1.0);
 			m_velocity3 = config.Get("Velocity3", -1.0);
 			m_velocity4 = config.Get("Velocity4", -1.0);
+
 			m_position1 = config.Get("Position1", -1.0);
 			m_position2 = config.Get("Position2", -1.0);
 			m_position3 = config.Get("Position3", -1.0);
 			m_position4 = config.Get("Position4", -1.0);
 
+			m_nsteps1 = config.Get("Nsteps1", 0);
+			m_nsteps2 = config.Get("Nsteps2", 0);
+			m_nsteps3 = config.Get("Nsteps3", 0);
 			m_nsteps4 = config.Get("Nsteps4", 0);
+
+			m_stepsize1 = config.Get("Stepsize1", 0.);
+			m_stepsize2 = config.Get("Stepsize2", 0.);
+			m_stepsize3 = config.Get("Stepsize3", 0.);
 			m_stepsize4 = config.Get("Stepsize4", 0.);
+
+			/*
+			  Move Mode:
+			  0 [default] for normal axis movement
+			  1 [hexagon] for hexagonal 2d axis movement
+			*/
+			m_movemode = config.Get("MoveMode", 0);
+
+			if (m_movemode == 1){
+			    // Read other parameters for hexagon
+			    m_start_position_id = config.Get("StartPosID",-1);
+
+			    m_home_position1 = config.Get("HomePosition1",0);
+			    m_home_position2 = config.Get("HomePosition2",0);
+
+			    // If start position ID not given, check for start position X/Y
+			    if (m_start_position_id > -1){
+				m_start_position1 = config.Get("StartPos1",0);
+				m_start_position2 = config.Get("StartPos2",0);
+			    }
+
+			    // set parameters of grid
+			    hexgrid.setCenterX(m_home_position1);
+			    hexgrid.setCenterY(m_home_position2);
+			    hexgrid.setStepX(m_stepsize1);
+			    hexgrid.setStepY(m_stepsize2);
+			    // Create hexagonal grid
+			    hexgrid.BuildGrid();
+			    EUDAQ_INFO("Number of positions " + std::to_string(hexgrid.getNpos()) + ". Starting at " + std::to_string(m_start_position_id));
+
+			}
 
 
 			// Set velocity
@@ -143,32 +183,55 @@ public:
 			wrapper->printVelocityStage(m_axis3);
 			wrapper->printVelocityStage(m_axis4);
 
-			// Move
+			// Move into starting position
 			printf("\nMoving...\n");
-			if (m_position1 >= m_axis1max) { m_position1 = m_axis1max; }
-			if (m_position1 < 0) { printf("No movement of axis1!\n"); }
-			else { wrapper->moveTo(m_axis1, m_position1); }
-			if (m_position2 >= m_axis2max) { m_position2 = m_axis2max; }
-			if (m_position2 < 0) { printf("No movement of axis2!\n"); }
-			else { wrapper->moveTo(m_axis2, m_position2); }
-			if (m_position3 >= m_axis3max) { m_position3 = m_axis3max; }
-			if (m_position3 < 0) { printf("No movement of axis3!\n"); }
-			else { wrapper->moveTo(m_axis3, m_position3); }
-			if (m_position4 >= m_axis4max) { m_position4 = m_axis4max; }
-			if (m_position4 < 0) { printf("No movement of axis4!\n"); }
-			else { wrapper->moveTo(m_axis4, m_position4); }
 
-			if (m_nsteps4 > 0){
+			// Normal movement
+			if (m_movemode == 0){
+			    if (m_position1 >= m_axis1max) { m_position1 = m_axis1max; }
+			    if (m_position1 < 0) { printf("No movement of axis1!\n"); }
+			    else { wrapper->moveTo(m_axis1, m_position1); }
+			    if (m_position2 >= m_axis2max) { m_position2 = m_axis2max; }
+			    if (m_position2 < 0) { printf("No movement of axis2!\n"); }
+			    else { wrapper->moveTo(m_axis2, m_position2); }
+			    if (m_position3 >= m_axis3max) { m_position3 = m_axis3max; }
+			    if (m_position3 < 0) { printf("No movement of axis3!\n"); }
+			    else { wrapper->moveTo(m_axis3, m_position3); }
+			    if (m_position4 >= m_axis4max) { m_position4 = m_axis4max; }
+			    if (m_position4 < 0) { printf("No movement of axis4!\n"); }
+			    else { wrapper->moveTo(m_axis4, m_position4); }
+
+			    if (m_nsteps4 > 0){
 				if (m_stepsize4 == 0.){
-					EUDAQ_ERROR("Amount of steps (NstepsX) given, but (StepsizeX) is 0. This cannot end well!");
+				    EUDAQ_ERROR("Amount of steps (NstepsX) given, but (StepsizeX) is 0. This cannot end well!");
 				}
 				else{
-					EUDAQ_INFO("Performing " + std::to_string(m_nsteps4) + " steps of " + std::to_string(m_stepsize4) + " units each. Starting at " + std::to_string(m_position4));
-					m_currstep = 0;
+				    EUDAQ_INFO("Performing " + std::to_string(m_nsteps4) + " steps of " + std::to_string(m_stepsize4) + " units each. Starting at " + std::to_string(m_position4));
+				    m_currstep = 0;
 				}
+			    }
 			}
 
-			// New position	
+			// Hexagonal grid
+			else if (m_movemode == 1){
+			    m_currstep = m_start_position_id;
+
+			    // get position coordinates
+			    m_position1 = hexgrid.getPosX(m_currstep);
+			    m_position2 = hexgrid.getPosY(m_currstep);
+
+			    // move to position
+			    if (m_position1 >= m_axis1max) { m_position1 = m_axis1max; }
+			    if (m_position1 < 0) { printf("No movement of axis1!\n"); }
+			    else { wrapper->moveTo(m_axis1, m_position1); }
+
+			    if (m_position2 >= m_axis2max) { m_position2 = m_axis2max; }
+			    if (m_position2 < 0) { printf("No movement of axis2!\n"); }
+			    else { wrapper->moveTo(m_axis2, m_position2); }
+
+			}
+
+			// New position
 			printf("\nCurrent position:\n");
 			wrapper->printPosition(m_axis1);
 			wrapper->printPosition(m_axis2);
@@ -184,7 +247,12 @@ public:
 			wrapper->getPosition2(m_axis3, &pos_curr3);
 			wrapper->getPosition2(m_axis4, &pos_curr4);
 
-			EUDAQ_INFO("Moved to x=" + std::to_string(pos_curr1) + " , y=" + std::to_string(pos_curr2) + " , phi=" + std::to_string(pos_curr4));
+			if (m_movemode == 0){
+			    EUDAQ_INFO("Moved to x=" + std::to_string(pos_curr1) + " , y=" + std::to_string(pos_curr2) + " , phi=" + std::to_string(pos_curr4));
+			}
+			else if (m_movemode == 1){
+			    EUDAQ_INFO("Moved to x=" + std::to_string(pos_curr1) + " , y=" + std::to_string(pos_curr2));
+			}
 
 			SetConnectionState(eudaq::ConnectionState::STATE_CONF, "Configured (" + config.Name() + ")");
 		}
@@ -199,6 +267,7 @@ public:
 		try {
 			// If a stepping is wanted, execute the next step.
 
+		    if(m_movemode == 0){
 			if (m_currstep < m_nsteps4 && m_stepsize4!=0){
 
 				if (m_currstep == 0){
@@ -226,16 +295,38 @@ public:
 				m_currstep++;
 
 			}
+		    }
+		    else if (m_movemode == 1){
+			if (m_currstep == m_start_position_id){
+			    EUDAQ_INFO("Initial step, staying at first position.");
+			}
+			else {
+			    // get position coordinates
+			    m_position1 = hexgrid.getPosX(m_currstep);
+			    m_position2 = hexgrid.getPosY(m_currstep);
+
+			    if (m_position1 <= m_axis1max && m_position1 >= 0. && m_position2 <= m_axis2max && m_position2 >= 0.){
+				wrapper->moveTo(m_axis1, m_position1);
+				wrapper->moveTo(m_axis2, m_position2);
+			    }
+			    else {
+				EUDAQ_ERROR("Position target out of range: x= " + std::to_string(m_position1) + " y= " + std::to_string(m_position2));
+			    }
+
+			}
 
 
-			// get position
-			printf("\nCurrent position:\n");
-			wrapper->printPosition(m_axis1);
-			wrapper->printPosition(m_axis2);
-			wrapper->printPosition(m_axis3);
-			wrapper->printPosition(m_axis4);
+		    }
 
-			SetConnectionState(eudaq::ConnectionState::STATE_RUNNING, "Running");
+
+		    // get position
+		    printf("\nCurrent position:\n");
+		    wrapper->printPosition(m_axis1);
+		    wrapper->printPosition(m_axis2);
+		    wrapper->printPosition(m_axis3);
+		    wrapper->printPosition(m_axis4);
+
+		    SetConnectionState(eudaq::ConnectionState::STATE_RUNNING, "Running");
 		}
 		catch (...) {
 			EUDAQ_ERROR("Unknown exception.");
@@ -289,7 +380,7 @@ public:
 
 private:
 	std::shared_ptr<PIWrapper> wrapper;
-	//PIWrapper wrapper(); 
+	//PIWrapper wrapper();
 	bool m_terminated;
 	std::string m_name;
 	char *m_hostname;
@@ -311,9 +402,22 @@ private:
 	double m_velocity3 = 0.0;
 	double m_velocity4 = 0.0;
 	double m_velocitymax = 10.0;
+	double m_stepsize1 = 0.0;
+	double m_stepsize2 = 0.0;
+	double m_stepsize3 = 0.0;
 	double m_stepsize4 = 0.0;
+	unsigned int m_nsteps1 = 0;
+	unsigned int m_nsteps2 = 0;
+	unsigned int m_nsteps3 = 0;
 	unsigned int m_nsteps4 = 0;
 	unsigned int m_currstep = 0;
+
+	// parameters for hexa grid
+	unsigned int m_start_position_id = 0;
+	double m_home_position1 = 0;
+	double m_home_position2 = 0;
+
+	HexGrid hexgrid();
 };
 
 // The main function that will create a Producer instance and run it
@@ -322,13 +426,13 @@ int main(int /*argc*/, const char **argv) {
   // then they will automatically be described in the help (-h) option
   eudaq::OptionParser op("PI Stages Controller", "0.0", "Run options");
   eudaq::Option<std::string> rctrl(op, "r", "runcontrol",
-                                   "tcp://localhost:44000", "address",
-                                   "The address of the RunControl.");
+				   "tcp://localhost:44000", "address",
+				   "The address of the RunControl.");
   eudaq::Option<std::string> level(
       op, "l", "log-level", "NONE", "level",
       "The minimum level for displaying log messages locally");
   eudaq::Option<std::string> name(op, "n", "name", "PIController", "string",
-                                  "The name of this Producer/Controller");
+				  "The name of this Producer/Controller");
 
   try {
     // This will look through the command-line arguments and set the options
@@ -338,7 +442,7 @@ int main(int /*argc*/, const char **argv) {
 
     // Create the instance
     PIController controller(name.Value(), rctrl.Value());
-	
+
     // And set it running...
     controller.Loop();
 
