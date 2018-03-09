@@ -21,7 +21,7 @@ if(${CMAKE_HOST_SYSTEM_NAME} STREQUAL "Windows")
 		HINTS "${CMAKE_SOURCE_DIR}/extern/pi/win/")
 
 	find_library(PI_GCS_LIB_LIBRARY 
-		NAMES PI_GCS2_DLL.dll
+		NAMES PI_GCS2_DLL
 		HINTS "${CMAKE_SOURCE_DIR}/extern/pi/win/")
 endif(${CMAKE_HOST_SYSTEM_NAME} STREQUAL "Windows")
 
