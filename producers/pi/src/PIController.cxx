@@ -28,7 +28,7 @@ public:
 
 	//~PIController();
 
-	virtual void PIController::OnInitialise(const eudaq::Configuration & init) {
+	virtual void OnInitialise(const eudaq::Configuration & init) {
 		try {
 			std::cout << "Initalising: " << init.Name() << std::endl;
 
@@ -106,7 +106,7 @@ public:
 		}
 	}
 
-	virtual void PIController::OnConfigure(const eudaq::Configuration &config) {
+	virtual void OnConfigure(const eudaq::Configuration &config) {
 		try {
 			std::cout << "Configuring: " << config.Name() << std::endl;
 
@@ -262,7 +262,7 @@ public:
 		}
 	}
 
-	virtual void PIController::OnStartRun(unsigned runnumber) {
+	virtual void OnStartRun(unsigned runnumber) {
 
 		try {
 			// If a stepping is wanted, execute the next step.
@@ -334,7 +334,7 @@ public:
 		}
 	}
 
-	virtual void PIController::OnStopRun() {
+	virtual void OnStopRun() {
 
 		try {
 			// No Action
@@ -358,7 +358,7 @@ public:
 		}
 	}
 
-	virtual void PIController::OnTerminate() {
+	virtual void OnTerminate() {
 
 		std::cout << "PIController terminating..." << std::endl;
 
@@ -366,7 +366,7 @@ public:
 		std::cout << "PIController " << m_name << " terminated." << std::endl;
 	}
 
-	void PIController::Loop() {
+	void Loop() {
 
 		// Loop until Run Control tells us to terminate
 		while (!m_terminated) {
@@ -385,6 +385,9 @@ private:
 	std::string m_name;
 	char *m_hostname;
 	int m_portnumber;
+	int  m_movemode;
+	int  m_start_position1;
+	int  m_start_position2;
 	char *m_axis1 = "1";
 	char *m_axis2 = "2";
 	char *m_axis3 = "3";
@@ -417,7 +420,7 @@ private:
 	double m_home_position1 = 0;
 	double m_home_position2 = 0;
 
-	HexGrid hexgrid();
+	HexGrid hexgrid;
 };
 
 // The main function that will create a Producer instance and run it
