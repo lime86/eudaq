@@ -1,4 +1,5 @@
-#include "eudaq/Controller.hh"
+#include "eudaq/RawDataEvent.hh"
+#include "eudaq/SlowProducer.hh"
 #include "eudaq/Logger.hh"
 #include "eudaq/Timer.hh"
 #include "eudaq/Utils.hh"
@@ -18,11 +19,12 @@
 //			     const std::string &runcontrol)
 //  : eudaq::Controller(name, runcontrol), m_terminated(false), m_name(name) { }
 
+static const std::string EVENT_TYPE = "PI";
 
-class PIController : public eudaq::Controller {
+class PIController : public eudaq::SlowProducer {
 public:
 	PIController(const std::string &name, const std::string &runcontrol)
-		: eudaq::Controller(name, runcontrol), m_terminated(false), m_name(name) {
+		: eudaq::SlowProducer(name, runcontrol), m_terminated(false), m_name(name) {
 		std::cout << "PIController was started successfully." << std::endl;
 	}
 
@@ -264,6 +266,8 @@ public:
 
 	virtual void OnStartRun(unsigned runnumber) {
 
+		m_run = runnumber;
+		
 		try {
 			// If a stepping is wanted, execute the next step.
 
@@ -320,11 +324,32 @@ public:
 
 
 		    // get position
+		        double pos_curr1;
+			double pos_curr2;
+			double pos_curr3;
+			double pos_curr4;
+			wrapper->getPosition2(m_axis1, &pos_curr1);
+			wrapper->getPosition2(m_axis2, &pos_curr2);
+			wrapper->getPosition2(m_axis3, &pos_curr3);
+			wrapper->getPosition2(m_axis4, &pos_curr4);
 		    printf("\nCurrent position:\n");
 		    wrapper->printPosition(m_axis1);
 		    wrapper->printPosition(m_axis2);
 		    wrapper->printPosition(m_axis3);
 		    wrapper->printPosition(m_axis4);
+		    
+		    // It must send a BORE to the Data Collector
+		    eudaq::RawDataEvent bore(eudaq::RawDataEvent::BORE(EVENT_TYPE, m_run));
+                   // You can set tags on the BORE that will be saved in the data file
+                   // and can be used later to help decoding
+                   bore.SetTag("pi_pos_chan1", eudaq::to_string(pos_curr1));
+                   bore.SetTag("pi_pos_chan2", eudaq::to_string(pos_curr2));
+                   bore.SetTag("pi_pos_chan3", eudaq::to_string(pos_curr3));
+                   bore.SetTag("pi_pos_chan4", eudaq::to_string(pos_curr4));
+
+    
+                   // Send the event to the Data Collector
+                   SendEvent(bore);
 
 		    SetConnectionState(eudaq::ConnectionState::STATE_RUNNING, "Running");
 		}
@@ -421,6 +446,8 @@ private:
 	double m_home_position2 = 0;
 
 	HexGrid hexgrid;
+	
+	unsigned m_run;
 };
 
 // The main function that will create a Producer instance and run it
