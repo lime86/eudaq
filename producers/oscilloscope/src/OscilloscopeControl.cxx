@@ -31,8 +31,8 @@ void ctrlchandler(int) { g_done += 1; }
 int main(int /*argc*/, char **argv) {
 
   eudaq::OptionParser op(
-      "Keysight Scope Control Utility", "1.0",
-      "A comand-line tool for controlling Keysight scopes");
+      "Scope Control Utility", "1.0",
+      "A comand-line tool for controlling scopes");
 	
   eudaq::Option<std::string> host_name(
       op, "r", "hostname", "", "127.0.0.1",

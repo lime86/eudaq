@@ -297,7 +297,9 @@ private:
 
   unsigned char conf_parameters[10];
 };
+
 // ----------------------------------------------------------------------
+
 int main(int /*argc*/, const char **argv) {
   std::cout << "Start Producer \n" << std::endl;
 
