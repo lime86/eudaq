@@ -65,13 +65,13 @@ struct config_details_for_one_scope_type {
 class KeysightScopeController {
 
 public:
-	unsigned int handshake_mode = 0;	
 	KeysightScopeController();
-
-	void SetConfigForScope(const config_details_for_one_scope_type conf);
+	virtual ~KeysightScopeController();
 
 	void SetAddress(std::string address);
 	void SetPort(std::string port);
+
+	void SetConfigForScope(const config_details_for_one_scope_type conf);
 
 	int Write(char* buf);
 	int Write(std::string command);
@@ -79,6 +79,8 @@ public:
 	std::string Read();
 
 	std::string GetIdentification();
+
+	std::string GetStatus();
 	int SetAuxVoltage(float voltage);
 	std::string GetAuxStatus();
 
@@ -87,7 +89,7 @@ public:
 	void StartRun();
 	void StartSingleRun();
 	void StopRun();
-	std::string GetStatus();
+	
 	int GetCurrentSegmentIndex();
 	std::string GetWaveformPreamble(unsigned int channel);
 	preamble_data_type DecodeWaveformPreamble(std::string preamble_string);
@@ -98,8 +100,13 @@ public:
 
         void OpenConnection();
 	void CloseConnection();
+	unsigned int handshake_mode = 0;	
+	
+	enum class FrontPanelState {ON, OFF, LOCK};
+	void SetFrontPanelState(FrontPanelState RequestedFrontPanelState);
+	FrontPanelState GetFrontPanelState();
 
-	virtual ~KeysightScopeController();
+	
 
 private:
   struct sockaddr_in config;

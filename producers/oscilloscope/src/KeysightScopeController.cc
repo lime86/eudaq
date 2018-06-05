@@ -302,3 +302,30 @@ void KeysightScopeController::CloseConnection() {
 KeysightScopeController::~KeysightScopeController() {
   CloseConnection();
 }
+
+void KeysightScopeController::SetFrontPanelState(FrontPanelState RequestedFrontPanelState) {
+	std::string commandOut;
+	switch(RequestedFrontPanelState) {
+		case FrontPanelState::ON : commandOut = ":SYST:GUI ON\n"; break;
+		case FrontPanelState::OFF : commandOut = ":SYST:GUI OFF\n"; break;
+		case FrontPanelState::LOCK : commandOut = ":SYST:GUI LOCK\n"; break;
+	}
+	Write(commandOut);
+};
+
+KeysightScopeController::FrontPanelState KeysightScopeController::GetFrontPanelState() {
+	Write(std::string(":SYST:GUI?\n"));
+	//sleep(1);
+	std::string answer;
+	answer = Read();
+	FrontPanelState CurrentFrontPanelState;
+	
+	if(answer == "ON") {
+		CurrentFrontPanelState = FrontPanelState::ON;
+	} else if(answer == "OFF") {
+		CurrentFrontPanelState = FrontPanelState::OFF;
+	} else if(answer == "LOCK") {
+		CurrentFrontPanelState = FrontPanelState::LOCK;
+	} else std::cout << "error reading front panel state" << std::endl;
+	return CurrentFrontPanelState;
+};
