@@ -26,6 +26,7 @@ clone_depth: 1
 # https://git.kaidan.im/lnj/qli-installer 
 
 
+
 environment:
   INSTALL_AFS: no
   INSTALL_ROOT: no
