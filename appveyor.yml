@@ -5,7 +5,7 @@ pull_requests:
 
 branches:
   only:
-    - feature-CI-v1.x-dev-arummler
+  - feature-CI-v1.x-dev-arummler
 
 # set clone depth to minimum in order to increase speed
 clone_depth: 1
