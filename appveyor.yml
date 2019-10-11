@@ -3,9 +3,9 @@ version: 1.10.0.{build}
 pull_requests:
   do_not_increment_build_number: true
 
-#branches:
-#  only:
-#  - feature-CI-v1.x-dev-arummler
+branches:
+  only:
+    - feature-CI-v1.x-dev-arummler
 
 # set clone depth to minimum in order to increase speed
 clone_depth: 1
