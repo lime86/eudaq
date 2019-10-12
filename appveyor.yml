@@ -212,8 +212,8 @@ init:
       }
     };
 
-    # CERN ROOT is not x64 compatible yet
     If ((${env:PLATFORM} -eq "x64")) {
+      # CERN ROOT is not x64 compatible yet
       $env:INSTALL_ROOT="no";
       $env:BUILD_root="OFF";
       $env:BUILD_offlinemon="OFF";
