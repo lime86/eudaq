@@ -24,7 +24,7 @@ ENDIF(NOT IS_DIRECTORY ${CMAKE_SOURCE_DIR}/.git)
 # https://blog.nathanosman.com/2017/11/24/using-windeployqt-with-cpack.html
 # https://cmake.org/cmake/help/latest/module/InstallRequiredSystemLibraries.html
 set(CMAKE_INSTALL_UCRT_LIBRARIES TRUE)
-include (DeployQt.cmake)
+include (${PROJECT_SOURCE_DIR}/cmake/DeployQt.cmake)
 # include(InstallRequiredSystemLibraries)
 
 # Set package version
