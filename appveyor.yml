@@ -450,10 +450,10 @@ after_build:
 #- cmd: 7z -o%APPVEYOR_BUILD_FOLDER% a eudaq_win32_%APPVEYOR_REPO_TAG_NAME%.zip %APPVEYOR_BUILD_FOLDER%
 #- cmd: dir %APPVEYOR_BUILD_FOLDER%
 - ps: >-
-    cpack -C Debug -G ZIP;
+    cpack -C ${env:configuration} -G ZIP;
     Push-AppveyorArtifact *.zip;    
     If (${env:build_type} -eq "standard" -Or ${env:build_type} -eq "full") {
-       cpack -C Debug -G NSIS;
+       cpack -C ${env:configuration} -G NSIS;
        #$blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'));
        Push-AppveyorArtifact *.exe;    
     };
