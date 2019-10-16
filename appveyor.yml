@@ -13,8 +13,8 @@ clone_depth: 1
 # comments on options:
 # ROOT6 is currently only x86 compatible (x64 and arm planned)
 # ROOT6 works only with VS2019 and higher
-# ROOT5 is only x86 compatible
-# VS2019 appveyor image has currently no Qt pre-installed
+# ROOT5 is only x86 compatible and considered legacy
+# VS2019 appveyor image has currently VS2017 Qt pre-installed which is binary compatible
 # BIFAHCAL: Requires cactus and does not compile properly on Windows
 # CMSPIXEL: Required pxar compiles on Windows but there are some minor problems afterwards
 
@@ -35,6 +35,13 @@ environment:
   INSTALL_QT_IF_NOT_PREINSTALLED: no
   matrix:      
     - build_type: standard
+      configuration: release
+      compiler_version: VS2019
+      root_flavour: 6
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+      platform: x86      
+    - build_type: standard
+      configuration: debug
       compiler_version: VS2019
       root_flavour: 6
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
@@ -84,16 +91,16 @@ environment:
   #   allow_failures:
   #     - compiler_version: VS2019
     
-  # for:
-  #   -
-  #     matrix:
-  #       except:
-  #         - build_type: full
-  #           platform: x86
-  #         - build_type: library_only
-  #           platform: x64
+for:
+  -
+    matrix:
+      except:
+        - build_type: standard
+          platform: x86
+        - build_type: library_only
+          platform: x64
         
-  #     skip_non_tags: true
+    skip_non_tags: true
 
 
       
