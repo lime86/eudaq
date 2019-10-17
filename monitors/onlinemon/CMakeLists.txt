@@ -59,6 +59,14 @@ TARGET_LINK_LIBRARIES(OnlineMon.exe EUDAQ ${ROOT_LIBRARIES} ${ADDITIONAL_LIBRARI
 #get_target_property(OnlineMon_EUDAQ_HEADERS OnlineMon.exe INCLUDE_DIRECTORIES)
 #message(${OnlineMon_EUDAQ_HEADERS})
 
+if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+  windeployqt(EUDAQ)
+elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
+  macdeployqt(EUDAQ)
+else()
+  message("System ${CMAKE_SYSTEM_NAME} does not package QT libs" )
+endif()
+
 INSTALL(TARGETS OnlineMon.exe
   EXPORT ${PROJECT_NAME}
   RUNTIME DESTINATION bin COMPONENT ONLINEMON
