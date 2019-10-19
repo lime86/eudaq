@@ -132,8 +132,11 @@ init:
         $env:BUILD_WITH_QT4="OFF"
         $env:BUILD_allproducer="OFF"
         $env:BUILD_altro="ON"
+        # altroUSB does not compile
         $env:BUILD_altroUSB="ON"
+        # cmspixel does not compile
         $env:BUILD_cmspixel="ON"
+        # depfet does not compile
         $env:BUILD_depfet="ON"
         $env:BUILD_drs4="ON"
         $env:BUILD_fortis="ON"
