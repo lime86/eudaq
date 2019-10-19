@@ -148,7 +148,8 @@ init:
         # Pixelman cmake does not work and link is dead
         $env:BUILD_pixelmanproducer="OFF"
         $env:BUILD_python="ON"
-        $env:BUILD_root="ON"
+        # ROOT producer does not compile
+        $env:BUILD_root="OFF"
         $env:BUILD_rpi_controller="OFF"
         $env:BUILD_runsplitter="ON"
         $env:BUILD_taki="ON"
