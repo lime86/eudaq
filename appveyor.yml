@@ -124,7 +124,8 @@ init:
     Switch (${env:build_type})
     {
       "full" {
-        $env:BUILD_AHCAL="ON"
+        # AHCAL does not compile
+        $env:BUILD_AHCAL="OFF"
         # BIFAHCAL needs CACTUS
         $env:BUILD_BIFAHCAL="OFF"
         $env:BUILD_TESTING="OFF"
