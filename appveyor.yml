@@ -126,7 +126,7 @@ init:
       "full" {
         $env:BUILD_AHCAL="ON"
         # BIFAHCAL needs CACTUS
-        $env:BUILD_BIFAHCAL="ON"
+        $env:BUILD_BIFAHCAL="OFF"
         $env:BUILD_TESTING="OFF"
         $env:BUILD_WITH_QT4="OFF"
         $env:BUILD_allproducer="OFF"
