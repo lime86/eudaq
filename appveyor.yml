@@ -44,6 +44,11 @@ environment:
     - build_type: standard
       configuration: release
       compiler_version: VS2019
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+      platform: x64  
+    - build_type: standard
+      configuration: release
+      compiler_version: VS2019
       root_flavour: 6
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
       platform: x86      
@@ -131,7 +136,8 @@ init:
         $env:BUILD_TESTING="OFF"
         $env:BUILD_WITH_QT4="OFF"
         $env:BUILD_allproducer="OFF"
-        $env:BUILD_altro="ON"
+        # altro requires pthread
+        $env:BUILD_altro="OFF"
         # altroUSB does not compile
         $env:BUILD_altroUSB="OFF"
         # cmspixel does not compile
@@ -139,11 +145,13 @@ init:
         # depfet does not compile
         $env:BUILD_depfet="OFF"
         $env:BUILD_drs4="ON"
-        $env:BUILD_fortis="ON"
+        # fortis requires pthread
+        $env:BUILD_fortis="OFF"
         $env:BUILD_gui="ON"
         $env:BUILD_main="ON"
         $env:BUILD_manual="OFF"
-        $env:BUILD_mimoroma="ON"
+        # mimorama require ioctl
+        $env:BUILD_mimoroma="OFF"
         $env:BUILD_ni="ON"
         $env:BUILD_nreader="OFF"
         $env:BUILD_offlinemon="ON"
@@ -367,6 +375,8 @@ install:
 # - ps: >- 
 #     appveyor\install_qt.ps1;
 #     $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+
+- cmd: echo $PATH
     
 before_build:    
 - ps: >- 
