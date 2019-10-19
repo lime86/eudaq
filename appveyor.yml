@@ -35,6 +35,12 @@ environment:
   INSTALL_QT_IF_NOT_PREINSTALLED: no
   CMAKE_BUILD_TYPE: Release
   matrix:      
+    - build_type: full
+      configuration: debug
+      compiler_version: VS2019
+      root_flavour: 6
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+      platform: x86      
     - build_type: standard
       configuration: release
       compiler_version: VS2019
@@ -118,34 +124,34 @@ init:
     Switch (${env:build_type})
     {
       "full" {
-        $env:BUILD_AHCAL="OFF"
-        $env:BUILD_BIFAHCAL="OFF"
+        $env:BUILD_AHCAL="ON"
+        $env:BUILD_BIFAHCAL="ON"
         $env:BUILD_TESTING="OFF"
         $env:BUILD_WITH_QT4="OFF"
-        $env:BUILD_allproducer="OFF"
-        $env:BUILD_altro="OFF"
-        $env:BUILD_altroUSB="OFF"
-        $env:BUILD_cmspixel="OFF"
-        $env:BUILD_depfet="OFF"
+        $env:BUILD_allproducer="ON"
+        $env:BUILD_altro="ON"
+        $env:BUILD_altroUSB="ON"
+        $env:BUILD_cmspixel="ON"
+        $env:BUILD_depfet="ON"
         $env:BUILD_drs4="ON"
-        $env:BUILD_fortis="OFF"
+        $env:BUILD_fortis="ON"
         $env:BUILD_gui="ON"
-        $env:BUILD_main="OFF"
+        $env:BUILD_main="ON"
         $env:BUILD_manual="OFF"
-        $env:BUILD_mimoroma="OFF"
+        $env:BUILD_mimoroma="ON"
         $env:BUILD_ni="ON"
         $env:BUILD_nreader="OFF"
-        $env:BUILD_offlinemon="OFF"
+        $env:BUILD_offlinemon="ON"
         $env:BUILD_onlinemon="ON"
-        $env:BUILD_palpidefs="OFF"
-        $env:BUILD_pixelmanproducer="OFF"
+        $env:BUILD_palpidefs="ON"
+        $env:BUILD_pixelmanproducer="ON"
         $env:BUILD_python="ON"
         $env:BUILD_root="ON"
         $env:BUILD_rpi_controller="OFF"
-        $env:BUILD_runsplitter="OFF"
-        $env:BUILD_taki="OFF"
-        $env:BUILD_timepix3="OFF"
-        $env:BUILD_timepixdummy="OFF"
+        $env:BUILD_runsplitter="ON"
+        $env:BUILD_taki="ON"
+        $env:BUILD_timepix3="ON"
+        $env:BUILD_timepixdummy="ON"
         $env:BUILD_tlu="ON"
         $env:IGNORE_KNOWN_ISSUES="ON"
         break
