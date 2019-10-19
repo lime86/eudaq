@@ -244,42 +244,50 @@ init:
       }
     };
 
+- ps: >-
     If ((${env:PLATFORM} -eq "x64")) {
       # CERN ROOT is not x64 compatible yet
       $env:INSTALL_ROOT="no";
       $env:BUILD_root="OFF";
       $env:BUILD_offlinemon="OFF";
-      $env:BUILD_onlinemon="OFF"      
+      $env:BUILD_onlinemon="OFF";
+      Write-Host "Installation of ROOT disabled on x64 as incompatible with ROOT. Everything depending on ROOT has been disabled.";      
     }
-
+- ps: >-
     If ((${env:BUILD_root} -eq "ON") -or (${env:BUILD_onlinemon} -eq "ON") -or (${env:BUILD_offlinemon} -eq "ON")) {
       $env:INSTALL_ROOT="yes";
+      Write-Host "ROOT installation enabled as it is required as dependency.";      
     }
-    
+- ps: >-
     If (${env:BUILD_gui} -eq "ON") {
       $env:SETUP_QT="yes";
+      Write-Host "QT will be enabled as it is required as dependency by GUI.";      
     }
-
+- ps: >-
     If (${env:configuration} -eq "debug") {
       $env:CMAKE_BUILD_TYPE="Debug";
+      Write-Host "DEBUG binaries will be created.";      
     }
-
+- ps: >-
     If (${env:BUILD_python} -eq "ON") {
       $env:SETUP_PYHON="yes";
+      Write-Host "Python will be prepared as the python bindings will be built.";      
     }    
 
 install:
+       # The following line enables the remote desktop connection and show the connection information.
+- ps:  iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'));
 
 - ps: >-
 
-    # The following line enables the remote desktop connection and show the connection information.
+    Write-Host "Settings to be used to load compiler and Qt version:";
+    Write-Host ( "Worker image: " + "${env:APPVEYOR_BUILD_WORKER_IMAGE}" );
+    Write-Host ( "Using compiler: " + "$env:compiler_version" + " " + "${env:platform}" );
+    If ("$env:SETUP_QT" -eq "yes") {	
+      Write-Host ( "Qt will be enabled" );
+    };
 
-    iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'));
-
-    Write-Host ${env:APPVEYOR_BUILD_WORKER_IMAGE};
-
-    Write-Host "${env:platform}";
-
+- ps: >-
     Switch ("$env:compiler_version")
     {
       "VS2013" {
