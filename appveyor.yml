@@ -153,8 +153,9 @@ init:
         $env:BUILD_rpi_controller="OFF"
         $env:BUILD_runsplitter="ON"
         $env:BUILD_taki="ON"
-        $env:BUILD_timepix3="ON"
-        $env:BUILD_timepixdummy="ON"
+        # SPIDR library not found
+        $env:BUILD_timepix3="OFF"
+        $env:BUILD_timepixdummy="OFF"
         $env:BUILD_tlu="ON"
         $env:IGNORE_KNOWN_ISSUES="ON"
         break
