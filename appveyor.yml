@@ -145,7 +145,8 @@ init:
         $env:BUILD_onlinemon="ON"
         # CERN box for driver no longer valid -- driver missing
         $env:BUILD_palpidefs="OFF"
-        $env:BUILD_pixelmanproducer="ON"
+        # Pixelman cmake does not work and link is dead
+        $env:BUILD_pixelmanproducer="OFF"
         $env:BUILD_python="ON"
         $env:BUILD_root="ON"
         $env:BUILD_rpi_controller="OFF"
