@@ -165,7 +165,8 @@ init:
         $env:BUILD_root="OFF"
         $env:BUILD_rpi_controller="OFF"
         $env:BUILD_runsplitter="ON"
-        $env:BUILD_taki="ON"
+        # Taki does not compile
+        $env:BUILD_taki="OFF"
         # SPIDR library not found
         $env:BUILD_timepix3="OFF"
         $env:BUILD_timepixdummy="OFF"
