@@ -143,7 +143,8 @@ init:
         $env:BUILD_nreader="OFF"
         $env:BUILD_offlinemon="ON"
         $env:BUILD_onlinemon="ON"
-        $env:BUILD_palpidefs="ON"
+        # CERN box for driver no longer valid -- driver missing
+        $env:BUILD_palpidefs="OFF"
         $env:BUILD_pixelmanproducer="ON"
         $env:BUILD_python="ON"
         $env:BUILD_root="ON"
