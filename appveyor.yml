@@ -271,7 +271,9 @@ init:
 install:
 
 - ps: >-
+
     # The following line enables the remote desktop connection and show the connection information.
+
     iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'));
 
     Write-Host ${env:APPVEYOR_BUILD_WORKER_IMAGE};
