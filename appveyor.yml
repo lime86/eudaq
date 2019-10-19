@@ -98,16 +98,16 @@ environment:
   #   allow_failures:
   #     - compiler_version: VS2019
     
-for:
-  -
-    matrix:
-      except:
-        - build_type: standard
-          platform: x86
-        - build_type: library_only
-          platform: x64
-        
-    skip_non_tags: true
+#for:
+#  -
+#    matrix:
+#      except:
+#        - build_type: standard
+#          platform: x86
+#        - build_type: library_only
+#          platform: x64
+#        
+#    skip_non_tags: true
 
 
       
