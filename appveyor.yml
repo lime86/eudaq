@@ -128,49 +128,49 @@ cache:
   - '%APPVEYOR_BUILD_FOLDER%\extern\rapidxml-1.13'
 
 init:
-  - ps: >-
+# AHCAL does not compile
+# BIFAHCAL needs CACTUS
+# altro requires pthread
+# altroUSB does not compile
+# cmspixel does not compile
+# depfet does not compile
+# fortis requires pthread
+# mimorama require ioctl
+# CERN box for alpide driver no longer valid -- driver missing
+# Pixelman cmake does not work and link is dead
+# ROOT producer does not compile
+# Taki does not compile
+# SPIDR library not found
+- ps: >-
     Switch (${env:build_type})
-     {
-        "full" {
-        # AHCAL does not compile
-        $env:BUILD_AHCAL="OFF"
-        # BIFAHCAL needs CACTUS
+      {
+      "full" {
+        $env:BUILD_AHCAL="OFF" 
         $env:BUILD_BIFAHCAL="OFF"
         $env:BUILD_TESTING="OFF"
         $env:BUILD_WITH_QT4="OFF"
         $env:BUILD_allproducer="OFF"
-        # altro requires pthread
         $env:BUILD_altro="OFF"
-        # altroUSB does not compile
         $env:BUILD_altroUSB="OFF"
-        # cmspixel does not compile
         $env:BUILD_cmspixel="OFF"
-        # depfet does not compile
         $env:BUILD_depfet="OFF"
         $env:BUILD_drs4="ON"
-        # fortis requires pthread
         $env:BUILD_fortis="OFF"
         $env:BUILD_gui="ON"
         $env:BUILD_main="ON"
         $env:BUILD_manual="OFF"
-        # mimorama require ioctl
         $env:BUILD_mimoroma="OFF"
         $env:BUILD_ni="ON"
         $env:BUILD_nreader="OFF"
         $env:BUILD_offlinemon="ON"
         $env:BUILD_onlinemon="ON"
-        # CERN box for driver no longer valid -- driver missing
         $env:BUILD_palpidefs="OFF"
-        # Pixelman cmake does not work and link is dead
         $env:BUILD_pixelmanproducer="OFF"
         $env:BUILD_python="ON"
-        # ROOT producer does not compile
         $env:BUILD_root="OFF"
         $env:BUILD_rpi_controller="OFF"
         $env:BUILD_runsplitter="ON"
-        # Taki does not compile
         $env:BUILD_taki="OFF"
-        # SPIDR library not found
         $env:BUILD_timepix3="OFF"
         $env:BUILD_timepixdummy="OFF"
         $env:BUILD_tlu="ON"
@@ -245,7 +245,7 @@ init:
         $env:IGNORE_KNOWN_ISSUES="OFF"
         break
       }
-    };
+      };
 
 - ps: >-
     If ((${env:PLATFORM} -eq "x64")) {
@@ -370,7 +370,8 @@ install:
       }
     }
 
-- ps:  Write-Host ( "Path after setting compiler and Qt: " + "${env:PATH}" );
+- ps: >-
+    Write-Host ( "Path after setting compiler and Qt: " + "${env:PATH}" );
 
 
 # Install Python (from the official .msi of http://python.org) and pip when not already installed.
