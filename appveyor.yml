@@ -7,10 +7,10 @@ branches:
   only:
   - feature-CI-v1.x-dev-arummler
 
-# set clone depth to minimum in order to increase speed
+# IMPORTANT: set clone depth to minimum in order to increase speed
 clone_depth: 1
 
-# comments on options:
+# COMMENTS on options:
 # ROOT6 is currently only x86 compatible (x64 and arm planned)
 # ROOT6 works only with VS2019 and higher
 # ROOT5 is only x86 compatible and considered legacy
@@ -282,10 +282,11 @@ install:
 
     Write-Host "Settings to be used to load compiler and Qt version:";
     Write-Host ( "Worker image: " + "${env:APPVEYOR_BUILD_WORKER_IMAGE}" );
-    Write-Host ( "Using compiler: " + "$env:compiler_version" + " " + "${env:platform}" );
+    Write-Host ( "Using compiler: " + "${env:compiler_version}" + " " + "${env:platform}" );
     If ("$env:SETUP_QT" -eq "yes") {	
       Write-Host ( "Qt will be enabled" );
     };
+    Write-Host ( "Path before setting compiler and Qt: " + "${env:PATH}" );
 
 - ps: >-
     Switch ("$env:compiler_version")
@@ -365,6 +366,8 @@ install:
         $host.SetShouldExit($LastExitCode)
       }
     }
+
+- ps:  Write-Host ( "Path after setting compiler and Qt: " + "${env:PATH}" );
 
 
 # Install Python (from the official .msi of http://python.org) and pip when not already installed.
