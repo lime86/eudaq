@@ -75,3 +75,6 @@ debug/*
 # ignore OS files
 Thumbs.db
 *.lnk
+
+#Âignore env directory for local tests with pyython
+env
