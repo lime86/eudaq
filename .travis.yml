@@ -2,19 +2,20 @@ language: cpp
 
 sudo: required
 
-dist: trusty
+dist: xenial
 
 branches:
   only:
     - master
     - v1.x-dev
     - feature-CI-v1.x-dev-arummler
+    - feature-CI-v1.x-dev-arummler-squash-1-rebase
 
 
 # set here versions / file paths
 env:
    global:
-      - ROOT6_FILENAME_MAC=root_v6.16.00.macosx64-10.13-clang100.tar.gz
+      - ROOT6_FILENAME_MAC=root_v6.18.04.macosx64-10.13-clang100.tar.gz
       
       - CMAKE_DOWNLOAD_PATH=https://cmake.org/files/v3.12
       - CMAKE_FILENAME_LINUX=cmake-3.12.2-Linux-x86_64.tar.gz
