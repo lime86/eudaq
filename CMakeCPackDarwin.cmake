@@ -9,7 +9,11 @@ set(CPACK_PACKAGE_NAME "${CMAKE_PROJECT_NAME}")
 set(CPACK_PACKAGE_VERSION "${EUDAQ_LIB_VERSION_STRIPPED}")
 set(CPACK_PACKAGE_INSTALL_DIRECTORY "${CPACK_PACKAGE_NAME}")
 set(CPACK_SOURCE_PACKAGE_FILE_NAME "eudaq-${EUDAQ_LIB_VERSION_STRIPPED}")
-set(CPACK_PACKAGE_ICON "${CMAKE_CURRENT_SOURCE_DIR}/images/eudaq_logo.bmp")
+if(${CPACK_SYSTEM_NAME} MATCHES Windows)
+  set(CPACK_PACKAGE_ICON "${CMAKE_CURRENT_SOURCE_DIR}\images\eudaq_logo.bmp")
+else()
+  set(CPACK_PACKAGE_ICON "${CMAKE_CURRENT_SOURCE_DIR}/images/eudaq_logo.bmp")
+endif()
 
 option(CMAKE_INSTALL_DEBUG_LIBRARIES
   "Install Microsoft runtime debug libraries with CMake." FALSE)
@@ -101,8 +105,18 @@ endif()
 
 # Set the options file that needs to be included inside CMakeCPackOptions.cmake
 set(QT_DIALOG_CPACK_OPTIONS_FILE ${CMake_BINARY_DIR}/Source/QtDialog/QtDialogCPack.cmake)
-configure_file("CMakeCPackOptions.cmake.in" "CMakeCPackOptions.cmake" @ONLY)
-set(CPACK_PROJECT_CONFIG_FILE "CMakeCPackOptions.cmake")
+if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+  configure_file("CMakeCPackOptionsWindows.cmake.in" "CMakeCPackOptionsWindows.cmake" @ONLY)
+  set(CPACK_PROJECT_CONFIG_FILE "CMakeCPackOptionsWindows.cmake")
+elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
+  configure_file("CMakeCPackOptionsDarwin.cmake.in" "CMakeCPackOptionsDarwin.cmake" @ONLY)
+  set(CPACK_PROJECT_CONFIG_FILE "CMakeCPackOptionsDarwin.cmake")
+elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+  configure_file("CMakeCPackOptionsLinux.cmake.in" "CMakeCPackOptionsLinux.cmake" @ONLY)
+  set(CPACK_PROJECT_CONFIG_FILE "CMakeCPackOptionsLinux.cmake")
+else()
+  message("System ${CMAKE_SYSTEM_NAME} not prepared for Cpack" )
+endif()
 
 #set(CPACK_COMPONENTS_ALL MAIN_LIB MAIN_EXE GUI TLU NI ONLINEMON MAIN_PYTHON RPICONTROLLER OFFLINEMON)
 

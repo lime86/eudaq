@@ -1,82 +1,383 @@
-version: 1.9.0.{build}
+---
+version: 1.10.0.{build}
 
 pull_requests:
   do_not_increment_build_number: true
-  
+
 branches:
   only:
-  - master
-  - v1.x-dev
+    - feature-CI-v1.x-dev-arummler-squash-1-rebase
 
-image: Visual Studio 2019
+# IMPORTANT: set clone depth to minimum in order to increase speed
+clone_depth: 1
 
-configuration: Release
-
-#  - x64
-platform: x86 
-
-# comments on options:
+# COMMENTS on options:
+# ROOT6 is currently only x86 compatible (x64 and arm planned) and
+# works only with VS2019 and higher
+#
+# ROOT5 is only x86 compatible and considered legacy
+#
+# VS2019 appveyor image has currently VS2017 Qt pre-installed which is binary
+# compatible
 # BIFAHCAL: Requires cactus and does not compile properly on Windows
-# cmspixel: Required pxar compiles on Windows but there are some minor problems afterwards
-# 
+# CMSPIXEL: Required pxar compiles on Windows but there are some minor
+# problems afterwards
+
+# current build strategy:
+# Differentiation of standard / library only build
+
+# How to install QT:
+# https://salsa.debian.org/debian/wireshark/blob/debian/master/tools/qt-installer-windows.qs
+# https://git.kaidan.im/lnj/qli-installer
+
+
 environment:
+  INSTALL_AFS: false
+  INSTALL_ROOT: false
+  SETUP_QT: false
+  SETUP_PYTHON: false
+  INSTALL_QT_IF_NOT_PREINSTALLED: false
+  CMAKE_BUILD_TYPE: Release
   matrix:
+    - build_type: full
+      configuration: debug
+      compiler_version: VS2019
+      root_flavour: 6
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+      platform: x86
+    - build_type: standard
+      configuration: release
+      compiler_version: VS2019
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+      platform: x64
+    - build_type: standard
+      configuration: release
+      compiler_version: VS2019
+      root_flavour: 6
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+      platform: x86
+    - build_type: standard
+      configuration: debug
+      compiler_version: VS2019
+      root_flavour: 6
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+      platform: x86
     - build_type: library_only
-      PATH: 'C:\Python36;C:\Miniconda36;C:\Miniconda36\\Scripts;%PATH%'
-      BUILD_AHCAL: OFF
-      BUILD_BIFAHCAL: OFF
-      BUILD_TESTING: OFF
-      BUILD_WITH_QT4: OFF
-      BUILD_allproducer: OFF
-      BUILD_altro: OFF
-      BUILD_altroUSB: OFF
-      BUILD_cmspixel: OFF
-      BUILD_depfet: OFF
-      BUILD_drs4: OFF
-      BUILD_fortis: OFF
-      BUILD_gui: OFF
-      BUILD_main: OFF
-      BUILD_manual: OFF
-      BUILD_mimoroma: OFF
-      BUILD_miniTLU: OFF
-      BUILD_ni: OFF
-      BUILD_nreader: OFF
-      BUILD_offlinemon: OFF
-      BUILD_onlinemon: OFF
-      BUILD_palpidefs: OFF
-      BUILD_pixelmanproducer: OFF
-      BUILD_python: OFF
-      BUILD_root: OFF
-      BUILD_taki: OFF
-      BUILD_timepixdummy: OFF
-      BUILD_tlu: OFF
-      USE_ROOT: OFF
-      IGNORE_KNOWN_ISSUES: OFF
-      PYTHON: "C:\\Python36"
-      PYTHON_VERSION: "3.6.1" 
-      PYTHON_ARCH: "32"        
+      compiler_version: VS2019
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+      platform: x64
+    - build_type: library_only
+      compiler_version: VS2017
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      platform: x64
+    - build_type: library_only
+      compiler_version: VS2017
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      platform: x86
+    - build_type: library_only
+      compiler_version: VS2015
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+      platform: x64
+    - build_type: library_only
+      compiler_version: VS2015
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+      platform: x86
+
+# No longer VS2013 compatible
+#     - build_type: library_only
+#       compiler_version: VS2013
+#       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2013
+#       platform: x64
+#     - build_type: library_only
+#       compiler_version: VS2013
+#       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2013
+#       platform: x86
+
+
+# matrix:
+# basic idea - in order to save time and have a full coverage at the same time:
+# build everything buildable for regular tests and do limited builds only for releases
+#   exclude:
+#     - platform: x64
+#       build_type: full
+#     - platform: x64
+#       build_type: minimum
+# Currently (March 2019) there is at least one bug in VS2019 Preview which makes it impossible to compile with ROOT
+# To be revisited when release appears on appveyor
+#   allow_failures:
+#     - compiler_version: VS2019
+
+# for:
+#   -
+#     matrix:
+#       except:
+#         - build_type: standard
+#           platform: x86
+#         - build_type: library_only
+#           platform: x64
+#
+#     skip_non_tags: true
+
 
 cache:
   - '%APPVEYOR_BUILD_FOLDER%\extern\ZestSC1'
   - '%APPVEYOR_BUILD_FOLDER%\extern\tlufirmware'
   - '%APPVEYOR_BUILD_FOLDER%\extern\libusb-win32'
   - '%APPVEYOR_BUILD_FOLDER%\extern\alice-its-alpide-software-master-3189f00d7515733d46a61a5ab2606e436df4955b'
-  - '%APPVEYOR_BUILD_FOLDER%\extern\tinyxml'  
-  
+  - '%APPVEYOR_BUILD_FOLDER%\extern\tinyxml'
+  - '%APPVEYOR_BUILD_FOLDER%\extern\rapidxml-1.13'
+
 init:
-# The following line enables the remote desktop connection and show the connection information.
-- ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+# AHCAL does not compile
+# BIFAHCAL needs CACTUS
+# altro requires pthread
+# altroUSB does not compile
+# cmspixel does not compile
+# depfet does not compile
+# fortis requires pthread
+# mimorama require ioctl
+# CERN box for alpide driver no longer valid -- driver missing
+# Pixelman cmake does not work and link is dead
+# ROOT producer does not compile
+# Taki does not compile
+# SPIDR library not found
+- ps: >-
+    Switch (${env:build_type})
+      {
+      "full" {
+        $env:BUILD_AHCAL="OFF" 
+        $env:BUILD_BIFAHCAL="OFF"
+        $env:BUILD_TESTING="OFF"
+        $env:BUILD_WITH_QT4="OFF"
+        $env:BUILD_allproducer="OFF"
+        $env:BUILD_altro="OFF"
+        $env:BUILD_altroUSB="OFF"
+        $env:BUILD_cmspixel="OFF"
+        $env:BUILD_depfet="OFF"
+        $env:BUILD_drs4="ON"
+        $env:BUILD_fortis="OFF"
+        $env:BUILD_gui="ON"
+        $env:BUILD_main="ON"
+        $env:BUILD_manual="OFF"
+        $env:BUILD_mimoroma="OFF"
+        $env:BUILD_ni="ON"
+        $env:BUILD_nreader="OFF"
+        $env:BUILD_offlinemon="ON"
+        $env:BUILD_onlinemon="ON"
+        $env:BUILD_palpidefs="OFF"
+        $env:BUILD_pixelmanproducer="OFF"
+        $env:BUILD_python="ON"
+        $env:BUILD_root="OFF"
+        $env:BUILD_rpi_controller="OFF"
+        $env:BUILD_runsplitter="ON"
+        $env:BUILD_taki="OFF"
+        $env:BUILD_timepix3="OFF"
+        $env:BUILD_timepixdummy="OFF"
+        $env:BUILD_tlu="ON"
+        $env:IGNORE_KNOWN_ISSUES="ON"
+        $env:INSTALL_QT_IF_NOT_PREINSTALLED="true"
+        break
+      }
+      "standard" {
+        $env:BUILD_AHCAL="OFF"
+        $env:BUILD_BIFAHCAL="OFF"
+        $env:BUILD_TESTING="OFF"
+        $env:BUILD_WITH_QT4="OFF"
+        $env:BUILD_allproducer="OFF"
+        $env:BUILD_altro="OFF"
+        $env:BUILD_altroUSB="OFF"
+        $env:BUILD_cmspixel="OFF"
+        $env:BUILD_depfet="OFF"
+        $env:BUILD_drs4="OFF"
+        $env:BUILD_fortis="OFF"
+        $env:BUILD_gui="ON"
+        $env:BUILD_main="ON"
+        $env:BUILD_manual="OFF"
+        $env:BUILD_mimoroma="OFF"
+        $env:BUILD_ni="ON"
+        $env:BUILD_nreader="OFF"
+        $env:BUILD_offlinemon="ON"
+        $env:BUILD_onlinemon="ON"
+        $env:BUILD_palpidefs="OFF"
+        $env:BUILD_pixelmanproducer="OFF"
+        $env:BUILD_python="OFF"
+        $env:BUILD_root="OFF"
+        $env:BUILD_rpi_controller="OFF"
+        $env:BUILD_runsplitter="ON"
+        $env:BUILD_taki="OFF"
+        $env:BUILD_timepix3="OFF"
+        $env:BUILD_timepixdummy="OFF"
+        $env:BUILD_tlu="ON"
+        $env:IGNORE_KNOWN_ISSUES="OFF"
+        $env:SETUP_QT="true"
+        $env:INSTALL_QT_IF_NOT_PREINSTALLED="true"
+        break
+      }
+      "library_only" {
+        $env:BUILD_AHCAL="OFF"
+        $env:BUILD_BIFAHCAL="OFF"
+        $env:BUILD_TESTING="OFF"
+        $env:BUILD_WITH_QT4="OFF"
+        $env:BUILD_allproducer="OFF"
+        $env:BUILD_altro="OFF"
+        $env:BUILD_altroUSB="OFF"
+        $env:BUILD_cmspixel="OFF"
+        $env:BUILD_depfet="OFF"
+        $env:BUILD_drs4="OFF"
+        $env:BUILD_fortis="OFF"
+        $env:BUILD_gui="OFF"
+        $env:BUILD_main="OFF"
+        $env:BUILD_manual="OFF"
+        $env:BUILD_mimoroma="OFF"
+        $env:BUILD_ni="OFF"
+        $env:BUILD_nreader="OFF"
+        $env:BUILD_offlinemon="OFF"
+        $env:BUILD_onlinemon="OFF"
+        $env:BUILD_palpidefs="OFF"
+        $env:BUILD_pixelmanproducer="OFF"
+        $env:BUILD_python="OFF"
+        $env:BUILD_root="OFF"
+        $env:BUILD_rpi_controller="OFF"
+        $env:BUILD_runsplitter="OFF"
+        $env:BUILD_taki="OFF"
+        $env:BUILD_timepix3="OFF"
+        $env:BUILD_timepixdummy="OFF"
+        $env:BUILD_tlu="OFF"
+        $env:IGNORE_KNOWN_ISSUES="OFF"
+        break
+      }
+      };
+
+- ps: >-
+    If ((${env:PLATFORM} -eq "x64")) {
+      # CERN ROOT is not x64 compatible yet
+      $env:INSTALL_ROOT="false";
+      $env:BUILD_root="OFF";
+      $env:BUILD_offlinemon="OFF";
+      $env:BUILD_onlinemon="OFF";
+      Write-Host "Installation of ROOT disabled on x64 as incompatible with ROOT. Everything depending on ROOT has been disabled.";
+    }
+- ps: >-
+    If ((${env:BUILD_root} -eq "ON") -or (${env:BUILD_onlinemon} -eq "ON") -or (${env:BUILD_offlinemon} -eq "ON")) {
+      $env:INSTALL_ROOT="true";
+      Write-Host "ROOT installation enabled as it is required as dependency.";
+    }
+- ps: >-
+    If (${env:BUILD_gui} -eq "ON") {
+      $env:SETUP_QT="true";
+      Write-Host "QT will be enabled as it is required as dependency by GUI.";
+    }
+- ps: >-
+    If (${env:configuration} -eq "debug") {
+      $env:CMAKE_BUILD_TYPE="Debug";
+      Write-Host "DEBUG binaries will be created.";
+    }
+- ps: >-
+    If (${env:BUILD_python} -eq "ON") {
+      $env:SETUP_PYHON="yes";
+      Write-Host "Python will be prepared as the python bindings will be built.";
+    }
 
 install:
-#- '"C:\Program Files\Microsoft SDKs\Windows\v8.1\Bin\SetEnv.cmd" /x86'
-#- call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" x86
-- call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars32.bat"
-# This is a workaround for a whole lot of annoying warnings about non-existing targets.
-# - cmd: del "C:\Program Files (x86)\MSBuild\14.0\Microsoft.Common.targets\ImportAfter\Xamarin.Common.targets"
+       # The following line enables the remote desktop connection and show the connection information.
+- ps:  iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'));
+
+- ps: >-
+
+    Write-Host "Settings to be used to load compiler and Qt version:";
+    Write-Host ( "Worker image: " + "${env:APPVEYOR_BUILD_WORKER_IMAGE}" );
+    Write-Host ( "Using compiler: " + "${env:compiler_version}" + " " + "${env:platform}" );
+    If ("$env:SETUP_QT" -eq "true") {
+      Write-Host ( "Qt will be enabled" );
+    };
+    Write-Host ( "Path before setting compiler and Qt: " + "${env:PATH}" );
+
+- ps: >-
+    Switch ("$env:compiler_version")
+    {
+      "VS2013" {
+      If (${env:platform} -eq "x86") {
+           "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\vcvarsall.bat x86" } else {
+           "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\vcvarsall.bat x86_amd64"
+        };
+      break
+      }
+      "VS2015" {
+        If (${platform} -eq "x86") {
+          "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat x86" } else {
+          "C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\SetEnv.cmd /x64";
+          "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat x86_amd64"
+        };
+      # This is a workaround for a whole lot of annoying warnings about non-existing targets.
+      Remove-Item -path "C:\Program Files (x86)\MSBuild\14.0\Microsoft.Common.targets\ImportAfter\Xamarin.Common.targets"
+      break
+      }
+      "VS2017" {
+        If ("$env:PLATFORM" -eq "x86") {
+          "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars32.bat"
+          $env:GENERATOR="-G `"Visual Studio 15 2017`" -A Win32";
+          If ("$env:SETUP_QT" -eq "true") {
+            $env:PATH="C:\Qt\5.12.2\msvc2017\bin;${env:PATH}"
+          } } else {
+          "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
+          $env:GENERATOR="-G `"Visual Studio 15 2017`" -A x64";
+          If ("$env:SETUP_QT" -eq "true") {
+            $env:PATH="C:\Qt\5.12.2\msvc2017_64\bin;${env:PATH}"
+          }
+        };
+      break
+      }
+      "VS2019" {
+        If ("$env:PLATFORM" -eq "x86") {
+          "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat x86";
+          $env:GENERATOR="-G `"Visual Studio 16 2019`" -A Win32";
+          If (("$env:SETUP_QT" -eq "true")) {
+            # Write-Host("Downloading file for Qt installation.");
+            # Start-FileDownload 'http://download.qt.io/official_releases/online_installers/qt-unified-windows-x86-online.exe';
+            # $env:QT_INSTALLER_VERSION_STRING="qt.qt5.5130.win32_msvc2017";
+            # .\qt-unified-windows-x86-online.exe --verbose --script appveyor/qt-installer-windows.qs | Out-Null;
+            # .\appveyor\Invoke-CmdScript.ps1 "C:\Qt\5.13.0\msvc2017\bin\qtenv2.bat";
+            # https://help.appveyor.com/discussions/questions/18777-how-to-use-vcvars64bat-from-powershell
+            cmd.exe /c "call `"C:\Qt\5.13.1\msvc2017\bin\qtenv2.bat`" && set > %temp%\qtenv2.txt";
+            Get-Content "$env:temp\qtenv2.txt" | Foreach-Object {
+                if ($_ -match "^(.*?)=(.*)$") {
+                Set-Content "env:\$($matches[1])" $matches[2]
+                };
+            }
+          } } else {
+          "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat x64";
+          $env:GENERATOR="-G `"Visual Studio 16 2019`" -A x64"
+          If (("$env:SETUP_QT" -eq "true")) {
+            # Write-Host("Downloading file for Qt installation.");
+            # Start-FileDownload 'http://download.qt.io/official_releases/online_installers/qt-unified-windows-x86-online.exe';
+            # $env:QT_INSTALLER_VERSION_STRING="qt.qt5.5130.win64_msvc2017_64";
+            # .\qt-unified-windows-x86-online.exe --verbose --script appveyor/qt-installer-windows.qs | Out-Null;
+            # "C:\Qt\5.13.0\msvc2017_64\bin\qtenv2.bat";
+            cmd.exe /c "call `"C:\Qt\5.13.1\msvc2017_64\bin\qtenv2.bat`" && set > %temp%\qtenv2.txt";
+            Get-Content "$env:temp\qtenv2.txt" | Foreach-Object {
+                if ($_ -match "^(.*?)=(.*)$") {
+                Set-Content "env:\$($matches[1])" $matches[2]
+                };
+            }
+          }
+        };
+      choco install nsis -pre;
+      break
+      }
+      default {
+        # It does not make sense to continue if no compiler has been chosen.
+        Write-Host "Unknown compiler version has been requested";
+        $host.SetShouldExit($LastExitCode)
+      }
+    }
+
+- ps: >-
+    Write-Host ( "Path after setting compiler and Qt: " + "${env:PATH}" );
+
 
 # Install Python (from the official .msi of http://python.org) and pip when not already installed.
-# This was copied from 
-- ps: if (-not(Test-Path($env:PYTHON))) { & appveyor\install_python.ps1 }    
+# This was copied from
+# - ps: if (-not(Test-Path("$env:PYTHON"))) { & appveyor\install_python.ps1 }
 # Prepend newly installed Python to the PATH of this build (this cannot be
 # done from inside the powershell script as it would require to restart
 # the parent CMD process).
@@ -92,48 +393,134 @@ install:
 # compiled extensions and are not provided as pre-built wheel packages,
 # pip will build them from source using the MSVC compiler matching the
 # target Python version and architecture
-- "%CMD_IN_ENV% pip install -r appveyor\\dev-requirements.txt"    
-    
-before_build:    
-# - ps: Write-Host "Downloading root from root.cern.ch"; appveyor\download.ps1 -downloadLocation 'https://root.cern.ch/download/root_v6.16.00.win32.vc15.zip' -storageLocation 'C:\\root_v6.16.00.win32.vc15.zip'; 7z -y x C:\\root_v6.16.00.win32.vc15.zip -oC:\; 
 
-- ps: appveyor\install_afs.ps1;
+- "%CMD_IN_ENV% pip install -r appveyor\\dev-requirements.txt"
 
-- ps: Restart-Computer -Force
+# - ps: >-
+#     appveyor\install_qt.ps1;
+#     $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 
-- ps: Start-Sleep -s 10;
+- cmd: echo $PATH
+
+before_build:
+- ps: >-
+
+    If (${env:INSTALL_ROOT} -eq "true") {
+      $env:ROOTSYS="C:\root"
+      $env:PATH="${env:ROOTSYS}\bin;${env:PATH}"
+      $env:ROOT_DIR="C:\root\cmake"
+      Switch (${env:compiler_version})
+      {
+        "VS2013" {
+          If (${env:root_flavour} -eq "5") {
+            Write-Host "Downloading root from root.cern.ch";
+            appveyor\download.ps1 -downloadLocation 'https://root.cern.ch/download/root_v5.34.38.win32.vc12.zip' -storageLocation 'C:\\root_v5.34.38.win32.vc12.zip'; 7z -y x C:\\root_v5.34.38.win32.vc12.zip -oC:\;
+          };
+          If (${env:root_flavour} -eq "6") {
+            # Something is wrong in the configuration settings -- root 6 only supported from VS2017 onwards (and probably only 2019 really working)
+            Write-Host "Unknown compiler version has been requested";
+            $host.SetShouldExit($LastExitCode)
+          };
+        break
+        }
+        "VS2015" {
+          If (${env:root_flavour} -eq "5") {
+            Write-Host "Downloading root from root.cern.ch";
+            appveyor\download.ps1 -downloadLocation 'https://root.cern.ch/download/root_v5.34.38.win32.vc12.zip' -storageLocation 'C:\\root_v5.34.38.win32.vc12.zip'; 7z -y x C:\\root_v5.34.38.win32.vc12.zip -oC:\;
+          };
+          If (${env:root_flavour} -eq "6") {
+            # Something is wrong in the configuration settings -- root 6 only supported from VS2017 onwards (and probably only 2019 really working)
+            Write-Host "Unknown compiler version has been requested";
+            $host.SetShouldExit($LastExitCode)
+          };        break
+        }
+        "VS2017" {
+          If (${env:root_flavour} -eq "5") {
+            Write-Host "Downloading root from root.cern.ch";
+            appveyor\download.ps1 -downloadLocation 'https://root.cern.ch/download/root_v5.34.38.win32.vc12.zip' -storageLocation 'C:\\root_v5.34.38.win32.vc12.zip'; 7z -y x C:\\root_v5.34.38.win32.vc12.zip -oC:\;
+          };
+          If (${env:root_flavour} -eq "6") {
+            Write-Host "Downloading root from root.cern.ch";
+            appveyor\download.ps1 -downloadLocation 'https://root.cern.ch/download/root_v6.18.00.win32.vc16.zip' -storageLocation 'C:\\root_v6.16.00.win32.vc15.zip'; 7z -y x C:\\root_v6.16.00.win32.vc15.zip -oC:\;
+          };
+        break
+        }
+        "VS2019" {
+          If (${env:root_flavour} -eq "5") {
+            Write-Host "Downloading root from root.cern.ch";
+            appveyor\download.ps1 -downloadLocation 'https://root.cern.ch/download/root_v5.34.38.win32.vc12.zip' -storageLocation 'C:\\root_v5.34.38.win32.vc12.zip'; 7z -y x C:\\root_v5.34.38.win32.vc12.zip -oC:\;
+          };
+          If (${env:root_flavour} -eq "6") {
+            If (${env:configuration} -eq "release") {
+               Write-Host "Downloading root 6.18.04 release version from root.cern.ch";
+               appveyor\download.ps1 -downloadLocation 'https://root.cern.ch/download/root_v6.18.04.win32.vc16.zip' -storageLocation 'C:\\root_v6.18.04.win32.vc16.zip'; 7z -y x C:\\root_v6.18.04.win32.vc16.zip -oC:\;
+            } else {
+               Write-Host "Downloading root 6.18.04 debug version from root.cern.ch";
+               appveyor\download.ps1 -downloadLocation 'https://root.cern.ch/download/root_v6.18.04.win32.vc16.debug.zip' -storageLocation 'C:\\root_v6.18.04.win32.vc16.debug.zip'; 7z -y x C:\\root_v6.18.04.win32.vc16.debug.zip -oC:\;
+            };
+          };
+          break
+        }
+        default {
+          # ROOT has been requested but I do not know how to install it for this compiler
+          Write-Host "ROOT has been requested but I do not know how to install it for this compiler";
+          $host.SetShouldExit($LastExitCode)
+        }
+      }
+    }
+
+- ps: >-
+    If (${env:INSTALL_AFS} -eq "true") {
+        appveyor\install_afs.ps1;
+        Restart-Computer -Force;
+        Start-Sleep -s 10;
+    }
 
 build_script:
-- ps: If( Test-Path("\\afs\desy.de\group\telescopes\")) { Write-Host("Afs seems to work properly")} ElseIf ( Test-Path("\\cern.ch\")) {Write-Host("Afs seems to work properly, but desy afs down?"); } Else { Write-Host("Something wrong with the afs installation"); }
+- ps: >-
+    If (${env:INSTALL_AFS} -eq "true") {
+      If( Test-Path("\\afs\desy.de\group\telescopes\")) { Write-Host("Afs seems to work properly")} ElseIf ( Test-Path("\\cern.ch\")) {Write-Host("Afs seems to work properly, but desy afs down?"); } Else { Write-Host("Something wrong with the afs installation"); };
+      If (Test-Path ("${env:APPVEYOR_BUILD_FOLDER}" + "\extern\ZestSC1")) {Write-Host ("Reusing cached ZestSC1 " + "${env:APPVEYOR_BUILD_FOLDER}" + "\extern\ZestSC1" + " instead of copying from AFS")} Else {Write-Host "Copying ZestSC1 from AFS"; Copy-item "\\afs\desy.de\group\telescopes\tlu\ZestSC1" -destination ("${env:APPVEYOR_BUILD_FOLDER}" + "\extern\ZestSC1") -recurse};
+      If (Test-Path ("${env:APPVEYOR_BUILD_FOLDER}" + "\extern\tlufirmware")) {Write-Host ("Reusing cached tlufirmware " + "${env:APPVEYOR_BUILD_FOLDER}" + "\extern\tlufirmware" + " instead of copying from AFS")} Else {Write-Host "Copying tlufirmware from AFS"; Copy-item "\\afs\desy.de\group\telescopes\tlu\tlufirmware" -destination ("${env:APPVEYOR_BUILD_FOLDER}" + "\extern\tlufirmware") -recurse};
+    };
 
-- ps: If (Test-Path ("${env:APPVEYOR_BUILD_FOLDER}" + "\extern\ZestSC1")) {Write-Host ("Reusing cached ZestSC1 " + "${env:APPVEYOR_BUILD_FOLDER}" + "\extern\ZestSC1" + " instead of copying from AFS")} Else {Write-Host "Copying ZestSC1 from AFS"; Copy-item "\\afs\desy.de\group\telescopes\tlu\ZestSC1" -destination ("${env:APPVEYOR_BUILD_FOLDER}" + "\extern\ZestSC1") -recurse}
+    If (Test-Path ("${env:APPVEYOR_BUILD_FOLDER}" + "\extern\libusb-win32")) {Write-Host ("Reusing cached libusb-win32 " + "${env:APPVEYOR_BUILD_FOLDER}" + "\extern\libusb-win32" + " instead of downloading from sourcefourge (which can be sometimes unreliable...)")} Else {Write-Host "Downloading libusb-win32 from sourceforge"; appveyor\download.ps1 -downloadLocation 'https://sourceforge.net/projects/libusb-win32/files/libusb-win32-releases/1.2.6.0/libusb-win32-bin-1.2.6.0.zip' -storageLocation 'C:\\libusb-win32-bin-1.2.6.0.zip'; $zipargument = ("-o" + "${env:APPVEYOR_BUILD_FOLDER}" + "\extern\"); 7z -y x C:\\libusb-win32-bin-1.2.6.0.zip $zipargument;  Rename-Item -path ("${env:APPVEYOR_BUILD_FOLDER}" + "\extern\libusb-win32-bin-1.2.6.0") -newName ("${env:APPVEYOR_BUILD_FOLDER}" + "\extern\libusb-win32")};
 
-- ps: If (Test-Path ("${env:APPVEYOR_BUILD_FOLDER}" + "\extern\tlufirmware")) {Write-Host ("Reusing cached tlufirmware " + "${env:APPVEYOR_BUILD_FOLDER}" + "\extern\tlufirmware" + " instead of copying from AFS")} Else {Write-Host "Copying tlufirmware from AFS"; Copy-item "\\afs\desy.de\group\telescopes\tlu\tlufirmware" -destination ("${env:APPVEYOR_BUILD_FOLDER}" + "\extern\tlufirmware") -recurse}
+    If (Test-Path ("${env:APPVEYOR_BUILD_FOLDER}" + "\extern\rapidxml-1.13")) {Write-Host ("Reusing cached rapidxml " + "${env:APPVEYOR_BUILD_FOLDER}" + "\extern\rapidxml-1.13" + " instead of downloading from sourcefourge (which can be sometimes unreliable...)")} Else {Write-Host "Downloading rapidxml from sourceforge"; appveyor\download.ps1 -downloadLocation 'https://downloads.sourceforge.net/project/rapidxml/rapidxml/rapidxml%201.13/rapidxml-1.13.zip' -storageLocation 'C:\\libusb-win32-bin-1.2.6.0.zip'; $zipargument = ("-o" + "${env:APPVEYOR_BUILD_FOLDER}" + "\extern\"); 7z -y x C:\\libusb-win32-bin-1.2.6.0.zip $zipargument;  Rename-Item -path ("${env:APPVEYOR_BUILD_FOLDER}" + "\extern\rapidxml-1.13") -newName ("${env:APPVEYOR_BUILD_FOLDER}" + "\extern\rapidxml-1.13")};
 
-- ps: If (Test-Path ("${env:APPVEYOR_BUILD_FOLDER}" + "\extern\libusb-win32")) {Write-Host ("Reusing cached libusb-win32 " + "${env:APPVEYOR_BUILD_FOLDER}" + "\extern\libusb-win32" + " instead of downloading from sourcefourge (which can be sometimes unreliable...)")} Else {Write-Host "Downloading libusb-win32 from sourceforge"; appveyor\download.ps1 -downloadLocation 'https://sourceforge.net/projects/libusb-win32/files/libusb-win32-releases/1.2.6.0/libusb-win32-bin-1.2.6.0.zip' -storageLocation 'C:\\libusb-win32-bin-1.2.6.0.zip'; $zipargument = ("-o" + "${env:APPVEYOR_BUILD_FOLDER}" + "\extern\"); 7z -y x C:\\libusb-win32-bin-1.2.6.0.zip $zipargument;  Rename-Item -path ("${env:APPVEYOR_BUILD_FOLDER}" + "\extern\libusb-win32-bin-1.2.6.0") -newName ("${env:APPVEYOR_BUILD_FOLDER}" + "\extern\libusb-win32")}
+    If (${env:BUILD_cmspixel} -eq "ON") { Write-Host("Installing pxarcore as required by cmspixel producer"); . ".\appveyor\install_pxar.ps1" };
 
-- ps: If (${env:BUILD_cmspixel} -eq "ON") { Write-Host("Installing pxarcore as required by cmspixel producer"); . ".\appveyor\install_pxar.ps1" }
+    If (${env:BUILD_palpidefs} -eq "ON") { Write-Host("Installing palpidefs drivers as required by palpidefs producer"); . ".\appveyor\install_tinyxml.ps1";. ".\appveyor\install_palpidefs_driver.ps1" };
 
-- ps: If (${env:BUILD_palpidefs} -eq "ON") { Write-Host("Installing palpidefs drivers as required by palpidefs producer"); . ".\appveyor\install_tinyxml.ps1";. ".\appveyor\install_palpidefs_driver.ps1" }
-- ps: If (${env:BUILD_palpidefs} -eq "ON") { [Environment]::SetEnvironmentVariable("PALPIDEFS_SPECIAL_PARAMETERS", "-DCMAKE_PALPIDEFS_DRIVER_INCLUDE:FILEPATH=%APPVEYOR_BUILD_FOLDER%\extern\alice-its-alpide-software-master-3189f00d7515733d46a61a5ab2606e436df4955b\pALPIDEfs-software -DUSE_TINYXML=on -DUSE_ROOT=on", "Process"); } Else { [Environment]::SetEnvironmentVariable("PALPIDEFS_SPECIAL_PARAMETERS", "", "Process"); }
+    If (${env:BUILD_palpidefs} -eq "ON") { [Environment]::SetEnvironmentVariable("PALPIDEFS_SPECIAL_PARAMETERS", "-DCMAKE_PALPIDEFS_DRIVER_INCLUDE:FILEPATH=%APPVEYOR_BUILD_FOLDER%\extern\alice-its-alpide-software-master-3189f00d7515733d46a61a5ab2606e436df4955b\pALPIDEfs-software -DUSE_TINYXML=on -DUSE_ROOT=on", "Process"); } Else { [Environment]::SetEnvironmentVariable("PALPIDEFS_SPECIAL_PARAMETERS", "", "Process"); };
 
 - cd %APPVEYOR_BUILD_FOLDER%\build
 
-- cmd: echo -DIGNORE_KNOWN_ISSUES=%IGNORE_KNOWN_ISSUES% -DBUILD_AHCAL=%BUILD_AHCAL% -DBUILD_BIFAHCAL=%BUILD_BIFAHCAL% -DBUILD_TESTING=%BUILD_TESTING% -DBUILD_WITH_QT4=%BUILD_WITH_QT4% -DBUILD_allproducer=%BUILD_allproducer% -DBUILD_altro=%BUILD_altro% -DBUILD_altroUSB=%BUILD_altroUSB% -DBUILD_cmspixel=%BUILD_cmspixel% -DBUILD_depfet=%BUILD_depfet% -DBUILD_drs4=%BUILD_drs4% -DBUILD_fortis=%BUILD_fortis% -DBUILD_gui=%BUILD_gui% -DBUILD_main=%BUILD_main% -DBUILD_manual=%BUILD_manual% -DBUILD_mimoroma=%BUILD_mimoroma% -DBUILD_miniTLU=%BUILD_miniTLU% -DBUILD_ni=%BUILD_ni% -DBUILD_nreader=%BUILD_nreader% -DBUILD_offlinemon=%BUILD_offlinemon% -DBUILD_onlinemon=%BUILD_onlinemon% -DBUILD_palpidefs=%BUILD_palpidefs% -DBUILD_pixelmanproducer=%BUILD_pixelmanproducer% -DBUILD_python=%BUILD_python% -DBUILD_root=%BUILD_root% -DBUILD_taki=%BUILD_taki% -DBUILD_timepixdummy=%BUILD_timepixdummy% -DBUILD_tlu=%BUILD_tlu% -DUSE_ROOT=%USE_ROOT% ..
+- cmd: echo -DIGNORE_KNOWN_ISSUES=%IGNORE_KNOWN_ISSUES% -DBUILD_AHCAL=%BUILD_AHCAL% -DBUILD_BIFAHCAL=%BUILD_BIFAHCAL% -DBUILD_TESTING=%BUILD_TESTING% -DBUILD_WITH_QT4=%BUILD_WITH_QT4% -DBUILD_allproducer=%BUILD_allproducer% -DBUILD_altro=%BUILD_altro% -DBUILD_altroUSB=%BUILD_altroUSB% -DBUILD_cmspixel=%BUILD_cmspixel% -DBUILD_depfet=%BUILD_depfet% -DBUILD_drs4=%BUILD_drs4% -DBUILD_fortis=%BUILD_fortis% -DBUILD_gui=%BUILD_gui% -DBUILD_main=%BUILD_main% -DBUILD_manual=%BUILD_manual% -DBUILD_mimoroma=%BUILD_mimoroma% -DBUILD_ni=%BUILD_ni% -DBUILD_nreader=%BUILD_nreader% -DBUILD_offlinemon=%BUILD_offlinemon% -DBUILD_onlinemon=%BUILD_onlinemon% -DBUILD_palpidefs=%BUILD_palpidefs% -DBUILD_pixelmanproducer=%BUILD_pixelmanproducer% -DBUILD_python=%BUILD_python% -DBUILD_root=%BUILD_root% -DBUILD_rpi-controller=%BUILD_rpi_controller% -DBUILD_runsplitter=%BUILD_runsplitter%  -DBUILD_taki=%BUILD_taki% -DBUILD_timepix3=%BUILD_timepix3% -DBUILD_timepixdummy=%BUILD_timepixdummy% -DBUILD_tlu=%BUILD_tlu% -DCMAKE_BUILD_TYPE=%CMAKE_BUILD_TYPE% ..
 
-- cmd: cmake -DIGNORE_KNOWN_ISSUES=%IGNORE_KNOWN_ISSUES% -DBUILD_AHCAL=%BUILD_AHCAL% -DBUILD_BIFAHCAL=%BUILD_BIFAHCAL% -DBUILD_TESTING=%BUILD_TESTING% -DBUILD_WITH_QT4=%BUILD_WITH_QT4% -DBUILD_allproducer=%BUILD_allproducer% -DBUILD_altro=%BUILD_altro% -DBUILD_altroUSB=%BUILD_altroUSB% -DBUILD_cmspixel=%BUILD_cmspixel% -DBUILD_depfet=%BUILD_depfet% -DBUILD_drs4=%BUILD_drs4% -DBUILD_fortis=%BUILD_fortis% -DBUILD_gui=%BUILD_gui% -DBUILD_main=%BUILD_main% -DBUILD_manual=%BUILD_manual% -DBUILD_mimoroma=%BUILD_mimoroma% -DBUILD_miniTLU=%BUILD_miniTLU% -DBUILD_ni=%BUILD_ni% -DBUILD_nreader=%BUILD_nreader% -DBUILD_offlinemon=%BUILD_offlinemon% -DBUILD_onlinemon=%BUILD_onlinemon% -DBUILD_palpidefs=%BUILD_palpidefs% %PALPIDEFS_SPECIAL_PARAMETER% -DBUILD_pixelmanproducer=%BUILD_pixelmanproducer% -DBUILD_python=%BUILD_python% -DBUILD_root=%BUILD_root% -DBUILD_taki=%BUILD_taki% -DBUILD_timepixdummy=%BUILD_timepixdummy% -DBUILD_tlu=%BUILD_tlu% -DUSE_ROOT=%USE_ROOT% ..
+ #- ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+
+- cmd: cmake %GENERATOR% -DROOT_DIR:PATH="C:\root\cmake" -DIGNORE_KNOWN_ISSUES=%IGNORE_KNOWN_ISSUES% -DBUILD_AHCAL=%BUILD_AHCAL% -DBUILD_BIFAHCAL=%BUILD_BIFAHCAL% -DBUILD_TESTING=%BUILD_TESTING% -DBUILD_WITH_QT4=%BUILD_WITH_QT4% -DBUILD_allproducer=%BUILD_allproducer% -DBUILD_altro=%BUILD_altro% -DBUILD_altroUSB=%BUILD_altroUSB% -DBUILD_cmspixel=%BUILD_cmspixel% -DBUILD_depfet=%BUILD_depfet% -DBUILD_drs4=%BUILD_drs4% -DBUILD_fortis=%BUILD_fortis% -DBUILD_gui=%BUILD_gui% -DBUILD_main=%BUILD_main% -DBUILD_manual=%BUILD_manual% -DBUILD_mimoroma=%BUILD_mimoroma% -DBUILD_ni=%BUILD_ni% -DBUILD_nreader=%BUILD_nreader% -DBUILD_offlinemon=%BUILD_offlinemon% -DBUILD_onlinemon=%BUILD_onlinemon% -DBUILD_palpidefs=%BUILD_palpidefs% %PALPIDEFS_SPECIAL_PARAMETER% -DBUILD_pixelmanproducer=%BUILD_pixelmanproducer% -DBUILD_python=%BUILD_python% -DBUILD_root=%BUILD_root% -DBUILD_rpi-controller=%BUILD_rpi_controller% -DBUILD_runsplitter=%BUILD_runsplitter% -DBUILD_taki=%BUILD_taki% -DBUILD_timepix3=%BUILD_timepix3% -DBUILD_timepixdummy=%BUILD_timepixdummy% -DBUILD_tlu=%BUILD_tlu%  -DCMAKE_BUILD_TYPE=%CMAKE_BUILD_TYPE% ..
 
 #- ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 
 - cmd: msbuild INSTALL.vcxproj
 
 after_build:
-- cmd: 7z -o%APPVEYOR_BUILD_FOLDER% a eudaq_win32_%APPVEYOR_REPO_TAG_NAME%.zip %APPVEYOR_BUILD_FOLDER%
-- cmd: dir %APPVEYOR_BUILD_FOLDER%
+#- cmd: 7z -o%APPVEYOR_BUILD_FOLDER% a eudaq_win32_%APPVEYOR_REPO_TAG_NAME%.zip %APPVEYOR_BUILD_FOLDER%
+#- cmd: dir %APPVEYOR_BUILD_FOLDER%
+- ps: >-
+    cpack -C ${env:configuration} -G ZIP;
+    Push-AppveyorArtifact *.zip;
+    If (${env:build_type} -eq "standard" -Or ${env:build_type} -eq "full") {
+       cpack -C ${env:configuration} -G NSIS;
+       #$blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'));
+       Push-AppveyorArtifact *.exe;
+    };
 
-artifacts:
-  - path: eudaq_win32_%APPVEYOR_REPO_TAG_NAME%.zip
-    name: Releases
+#artifacts:
+#  - path: %APPVEYOR_BUILD_FOLDER%/eudaq_win32_%APPVEYOR_REPO_TAG_NAME%.zip
+#    name: Releases
 
 deploy:
   provider: GitHub
@@ -145,6 +532,6 @@ deploy:
   prerelease: false
   on:
     appveyor_repo_tag: true
-    
+
 on_finish:
 #- ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))

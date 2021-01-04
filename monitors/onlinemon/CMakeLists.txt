@@ -1,8 +1,5 @@
-if(WIN32)
-  find_package(ROOT REQUIRED COMPONENTS Gui Core Hist RIO)
-else()
-  find_package(ROOT REQUIRED COMPONENTS Gui)
-endif()
+find_package(ROOT REQUIRED COMPONENTS Core Gui)
+
 
 INCLUDE(${ROOT_USE_FILE})
 
@@ -52,12 +49,23 @@ ADD_EXECUTABLE(OnlineMon.exe ${OnlineMon_SOURCES} ${OnlineMon_DICTIONARY})
 TARGET_INCLUDE_DIRECTORIES(OnlineMon.exe PRIVATE 
   $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/monitors/onlinemon/include>
 )
+
+message(${ROOT_LIBRARIES})
+
 TARGET_LINK_LIBRARIES(OnlineMon.exe EUDAQ ${ROOT_LIBRARIES} ${ADDITIONAL_LIBRARIES})
 
 #get_target_property(OnlineMon_EUDAQ_HEADERS EUDAQ INCLUDE_DIRECTORIES)
 #message(${OnlineMon_EUDAQ_HEADERS})
 #get_target_property(OnlineMon_EUDAQ_HEADERS OnlineMon.exe INCLUDE_DIRECTORIES)
 #message(${OnlineMon_EUDAQ_HEADERS})
+
+#if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+#  windeployqt(OnlineMon.exe)
+#elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
+#  macdeployqt(OnlineMon.exe)
+#else()
+#  message("System ${CMAKE_SYSTEM_NAME} does not package QT libs" )
+#endif()
 
 INSTALL(TARGETS OnlineMon.exe
   EXPORT ${PROJECT_NAME}
