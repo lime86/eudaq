@@ -9,7 +9,7 @@ branches:
     - master
     - v1.x-dev
     - feature-CI-v1.x-dev-arummler
-    - feature-CI-v1.x-dev-arummler-squash-1-rebase
+    - v1.x-dev-CI-restart-2021
 
 
 # set here versions / file paths

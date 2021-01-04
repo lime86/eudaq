@@ -6,7 +6,7 @@ pull_requests:
 
 branches:
   only:
-    - feature-CI-v1.x-dev-arummler-squash-1-rebase
+    - v1.x-dev-CI-restart-2021
 
 # IMPORTANT: set clone depth to minimum in order to increase speed
 clone_depth: 1
