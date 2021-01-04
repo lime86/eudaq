@@ -73,5 +73,9 @@ debug/*
 *.tar*
 
 # ignore OS files
+
 Thumbs.db
 *.lnk
+
+# ignore env directory for local tests with python
+env
