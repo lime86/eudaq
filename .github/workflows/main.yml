@@ -40,10 +40,6 @@ env:
   
     
 jobs:
-  strategy:
-    matrix:
-      os: [ubuntu-18.04, ubuntu-20.04]
-      compiler: [gcc, clang]
       
   build:
     # The CMake configure and build commands are platform agnostic and should work equally
@@ -51,6 +47,10 @@ jobs:
     # cross-platform coverage.
     # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
     runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-18.04, ubuntu-20.04]
+        compiler: [gcc, clang]    
 
     steps:
     - uses: actions/checkout@v2
