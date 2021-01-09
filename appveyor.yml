@@ -6,7 +6,7 @@ pull_requests:
 
 branches:
   only:
-    - v1.x-dev-CI-restart-2021
+    - v1.x-dev-CI-restart-2021-deactivate
 
 # IMPORTANT: set clone depth to minimum in order to increase speed
 clone_depth: 1

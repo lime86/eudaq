@@ -9,7 +9,7 @@ branches:
     - master
     - v1.x-dev
     - feature-CI-v1.x-dev-arummler
-    - v1.x-dev-CI-restart-2021
+    - v1.x-dev-CI-restart-2021-deactivate
 
 
 # set here versions / file paths
