@@ -68,15 +68,15 @@ jobs:
         cached: ${{ steps.cache-qt.outputs.cache-hit }}
         
     - name: Install LibUSB 1.0)
-      run: if [ ${{matrix.os}} ~= ^macOS.* ]; then
-              brew install libusb
-              echo "Installing libUSB 1.0 for MacOS"
-           elif [ ${{matrix.os}} ~= ^ubuntu.* ]; then
-              sudo apt-get install --force-yes -y libusb-1.0-0 libusb-1.0-0-dev
-              echo "Installing libUSB 1.0 for Linux/Ubuntu"
+      run: if [ ${{matrix.os}} ~= ^macOS.* ]; then;
+              brew install libusb;
+              echo "Installing libUSB 1.0 for MacOS";
+           elif [ ${{matrix.os}} ~= ^ubuntu.* ]; then;
+              sudo apt-get install --force-yes -y libusb-1.0-0 libusb-1.0-0-dev;
+              echo "Installing libUSB 1.0 for Linux/Ubuntu";
            else
-              echo "${{matrix.os}} not supported"
-              exit 1
+              echo "${{matrix.os}} not supported";
+              exit 1;
            fi
       shell: bash
 
