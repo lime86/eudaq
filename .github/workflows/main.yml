@@ -68,7 +68,8 @@ jobs:
         cached: ${{ steps.cache-qt.outputs.cache-hit }}
         
     - name: Install LibUSB 1.0)
-      run: if [ ${{matrix.os}} ~= ^macOS.* ]; then;
+      run: |
+           if [ ${{matrix.os}} ~= ^macOS.* ]; then;
               brew install libusb;
               echo "Installing libUSB 1.0 for MacOS";
            elif [ ${{matrix.os}} ~= ^ubuntu.* ]; then;
