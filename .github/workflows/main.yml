@@ -49,8 +49,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-18.04, ubuntu-20.04]
-        compiler-c: [gcc, clang]    
+        os: [ubuntu-latest, ubuntu-20.04]
         compiler-cpp: [g++, clang++]            
 
     steps:
