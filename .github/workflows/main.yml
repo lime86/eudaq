@@ -18,7 +18,7 @@ env:
   BUILD_altroUSB: OFF
   BUILD_cmspixel: OFF
   BUILD_depfet: OFF
-  BUILD_drs4: OFF
+  BUILD_drs4: ON
   BUILD_fortis: OFF
   BUILD_gui: ON
   BUILD_main: OFF
@@ -73,7 +73,7 @@ jobs:
               brew install libusb-compat
               echo "Installing libUSB 0.1 for MacOS"
            elif [[ "${{matrix.os}}" =~ ^ubuntu.* ]]; then
-              sudo apt-get install --force-yes -y libusb-dev
+              sudo apt-get install -y libusb-dev
               echo "Installing libUSB 0.1 for Linux/Ubuntu"
            else
               echo "${{matrix.os}} not supported"
@@ -81,6 +81,19 @@ jobs:
            fi
       shell: bash
 
+    - name: Install LibUSB 1.0
+      run: |
+           if [[ ${{matrix.os}} =~ ^macOS.* ]]; then
+              brew install libusb
+              echo "Installing libUSB 1.0 for MacOS"
+           elif [[ "${{matrix.os}}" =~ ^ubuntu.* ]]; then
+              sudo apt-get install -y libusb-1.0-0 libusb-1.0-0-dev
+              echo "Installing libUSB 1.0 for Linux/Ubuntu"
+           else
+              echo "${{matrix.os}} not supported"
+              exit 1
+           fi
+      shell: bash
     
     - name: Create Build Environment
       # Some projects don't allow in-source building, so create a separate build directory
