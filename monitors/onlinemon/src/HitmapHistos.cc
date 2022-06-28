@@ -26,6 +26,12 @@ HitmapHistos::HitmapHistos(SimpleStandardPlane p, RootMonitor *mon)
     is_MIMOSA26 = true;
   } else if (_sensor == std::string("APIX")) {
     is_APIX = true;
+  } else if (_sensor == std::string("RD53A")) {
+    is_RD53A = true;
+  } else if (_sensor == std::string("RD53B")) {
+    is_RD53B = true;
+  } else if (_sensor == std::string("RD53BQUAD")) {
+    is_RD53BQUAD = true;
   } else if ((_sensor == std::string("USBPIX")) || (_sensor.find("USBPIXI-") != std::string::npos)) {
     is_USBPIX = true;
   } else if ((_sensor == std::string("USBPIXI4")) || (_sensor.find("USBPIXI4-") == std::string::npos)) {
@@ -65,15 +71,21 @@ HitmapHistos::HitmapHistos(SimpleStandardPlane p, RootMonitor *mon)
 
     sprintf(out, "%s %i LVL1 Pixel Distribution", _sensor.c_str(), _id);
     sprintf(out2, "h_lvl1_%s_%i", _sensor.c_str(), _id);
-    _lvl1Distr = new TH1I(out2, out, 16, 0, 16);
+    unsigned int lvl1_bin = 16;
+    if(p.is_RD53A || p.is_RD53B || p.is_RD53BQUAD)
+    {
+        lvl1_bin = 32;
+    }
+    _lvl1Distr = new TH1I(out2, out, lvl1_bin, 0, lvl1_bin);
+    SetHistoAxisLabelx(_lvl1Distr, "Lvl1 [25 ns]");
 
     sprintf(out, "%s %i LVL1 Cluster Distribution", _sensor.c_str(), _id);
     sprintf(out2, "h_lvl1cluster_%s_%i", _sensor.c_str(), _id);
-    _lvl1Cluster = new TH1I(out2, out, 16, 0, 16);
+    _lvl1Cluster = new TH1I(out2, out, lvl1_bin, 0, lvl1_bin);
 
     sprintf(out, "%s %i LVL1 Clusterwidth", _sensor.c_str(), _id);
     sprintf(out2, "h_lvl1width_%s_%i", _sensor.c_str(), _id);
-    _lvl1Width = new TH1I(out2, out, 16, 0, 16);
+    _lvl1Width = new TH1I(out2, out, lvl1_bin, 0, lvl1_bin);
 
     sprintf(out, "%s %i TOT Single Pixels", _sensor.c_str(), _id);
     sprintf(out2, "h_totsingle_%s_%i", _sensor.c_str(), _id);

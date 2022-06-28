@@ -40,11 +40,10 @@ Converting(eudaq::EventSPC d1, eudaq::StandardEventSP d2, eudaq::ConfigurationSP
 
    //In the Gen3 producer we will only have one data block, always!
    auto pixelVec = eudaq::decodeFEI4Data(evRaw->GetBlock(0));
-   //int boardID = evRaw->GetTag("board", -999);
-   int boardID = -1;
-   std::cout << boardID << std::endl;
-   
-   if(evRaw->IsBORE()) std::cout << "is BORE" << std::endl;
+   int boardID = evRaw->GetTag("board", -999);
+   auto triggerID = GetTriggerID(*evRaw);
+   std::cout << "TriggerID board " << boardID << " : " << triggerID << std::endl;
+
    
    if(std::find(attachedBoards.begin(), attachedBoards.end(), boardID) == attachedBoards.end()) {
       attachedBoards.push_back(boardID);
