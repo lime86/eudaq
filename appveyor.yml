@@ -3,12 +3,11 @@ version: 2.0.0.{build}
 pull_requests:
   do_not_increment_build_number: true
   
-branches:
-  only:
-  - master
-  - v1.7-dev
+#branches:
+#  only:
+#  - master
 
-os: Visual Studio 2017
+os: Visual Studio 2022
 
 configuration: Release
 
@@ -22,7 +21,7 @@ environment:
   matrix:
     - build_type: full
       ROOTSYS: C:\root
-      PATH: '%ROOTSYS%\bin;C:\Qt\5.9\msvc2017;C:\Python36;C:\Miniconda36;C:\Miniconda36\\Scripts;%PATH%'
+      PATH: '%ROOTSYS%\bin;C:\Qt\5.15\msvc2022;C:\Python36;C:\Miniconda36;C:\Miniconda36\\Scripts;%PATH%'
       CMAKE_BUILD_TYPE: RelWithDebInfo
       EUDAQ_BUILD_EXECUTABLE: ON
       EUDAQ_BUILD_GUI: ON
@@ -44,7 +43,7 @@ environment:
       PYTHON_ARCH: "32"
     - build_type: minimum
       ROOTSYS: C:\root
-      PATH: '%ROOTSYS%\bin;C:\Qt\5.9\msvc2017;C:\Python36;C:\Miniconda36;C:\Miniconda36\\Scripts;%PATH%'
+      PATH: '%ROOTSYS%\bin;C:\Qt\5.15\msvc2022;C:\Python36;C:\Miniconda36;C:\Miniconda36\\Scripts;%PATH%'
       CMAKE_BUILD_TYPE: RelWithDebInfo
       EUDAQ_BUILD_EXECUTABLE: ON
       EUDAQ_BUILD_GUI: ON
@@ -66,7 +65,7 @@ environment:
       PYTHON_ARCH: "32"
     - build_type: library_only
       ROOTSYS: C:\root
-      PATH: '%ROOTSYS%\bin;C:\Qt\5.9\msvc2017;C:\Python36;C:\Miniconda36;C:\Miniconda36\\Scripts;%PATH%'
+      PATH: '%ROOTSYS%\bin;C:\Qt\5.15\msvc2022;C:\Python36;C:\Miniconda36;C:\Miniconda36\\Scripts;%PATH%'
       CMAKE_BUILD_TYPE: RelWithDebInfo
       EUDAQ_BUILD_EXECUTABLE: OFF
       EUDAQ_BUILD_GUI: OFF
@@ -123,7 +122,7 @@ install:
 - "%CMD_IN_ENV% python -m pip install -r appveyor\\dev-requirements.txt"    
     
 before_build:    
-- ps: Write-Host "Downloading root from root.cern.ch"; appveyor\download.ps1 -downloadLocation 'https://root.cern/download/root_v6.22.08.win32.vc16.zip' -storageLocation 'C:\\root_v6.22.08.win32.vc16.zip'; 7z -y x C:\\root_v6.22.08.win32.vc16.zip -oC:\;
+- ps: Write-Host "Downloading root from root.cern.ch"; appveyor\download.ps1 -downloadLocation 'https://root.cern/download/root_v6.28.02.win32.vc17.zip' -storageLocation 'C:\\root_v6.28.02.win32.vc17.zip'; 7z -y x C:\\root_v6.28.02.win32.vc17.zip -oC:\;
 
 - ps: appveyor\install_afs.ps1;
 
