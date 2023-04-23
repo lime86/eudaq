@@ -66,7 +66,7 @@ public:
   bool Converting(eudaq::EventSPC d1, eudaq::StdEventSP d2, eudaq::ConfigSPC conf) const override;
   static const uint32_t m_id_factory = eudaq::cstr2hash("Yarr");
 private:
-  void decodeBORE(const eudaq::RawEvent &bore);
+  void decodeBORE(std::shared_ptr<const eudaq::RawEvent> bore) const;
   bool producerBOREdecoded(unsigned int prodID) {
      return m_decodedInRun.find(prodID) != m_decodedInRun.end();
   };
@@ -87,16 +87,16 @@ namespace{
     Register<YarrRawEvent2StdEventConverter>(YarrRawEvent2StdEventConverter::m_id_factory);
 }
 
-void YarrRawEvent2StdEventConverter::decodeBORE(const eudaq::RawEvent &bore) {
-                std::string event_version = bore.GetTag("YARREVENTVERSION", "1.0.0");
+void YarrRawEvent2StdEventConverter::decodeBORE(std::shared_ptr<const eudaq::RawEvent> bore) const{
+                std::string event_version = bore->GetTag("YARREVENTVERSION", "1.0.0");
 
 		// getting the producer ID for event version >=2.0.1
-		int prodID = std::stoi(bore.GetTag("PRODID"));
-		std::cout << "producer tag in BORE: " << bore.GetTag("PRODID") << std::endl;
+		int prodID = std::stoi(bore->GetTag("PRODID"));
+		std::cout << "producer tag in BORE: " << bore->GetTag("PRODID") << std::endl;
 		
                 m_EventVersion[prodID] = event_version; // only now we have the producer ID available
                 
-                std::string DUTTYPE = bore.GetTag("DUTTYPE");
+                std::string DUTTYPE = bore->GetTag("DUTTYPE");
                 
                 if(DUTTYPE=="RD53A") {
                    m_FrontEndType[prodID] = "Rd53a";
@@ -106,7 +106,7 @@ void YarrRawEvent2StdEventConverter::decodeBORE(const eudaq::RawEvent &bore) {
 		std::cout << "YarrConverterPlugin: front end type " << m_FrontEndType.at(prodID) << " declared in BORE for producer " << prodID << std::endl;
 		
 		// getting the module information for event version >=2.1.0
-		jsoncons::json moduleChipInfoJson = jsoncons::json::parse(bore.GetTag("MODULECHIPINFO"));
+		jsoncons::json moduleChipInfoJson = jsoncons::json::parse(bore->GetTag("MODULECHIPINFO"));
 		for(const auto& uid : moduleChipInfoJson["uid"].array_range()) {
            chipInfo currentlyHandledChip;
 		   currentlyHandledChip.name = uid["name"].as<std::string>();
@@ -138,6 +138,8 @@ void YarrRawEvent2StdEventConverter::decodeBORE(const eudaq::RawEvent &bore) {
 bool YarrRawEvent2StdEventConverter::Converting(eudaq::EventSPC d1, eudaq::StdEventSP d2, eudaq::ConfigSPC conf) const{
   auto ev = std::dynamic_pointer_cast<const eudaq::RawEvent>(d1);
   size_t nblocks= ev->NumBlocks();
+  
+  if(ev->IsBORE()) this->decodeBORE(ev);
   
   // Differentiate between different sensors
   int prodID = std::stoi(ev->GetTag("PRODID"));  
